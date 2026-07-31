@@ -1,11 +1,12 @@
+name: safeops-database
 services:
   postgres:
     image: postgres:17-alpine
 
     environment:
-      POSTGRES_DB: safeops
-      POSTGRES_USER: safeops
-      POSTGRES_PASSWORD: safeops
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
     ports:
       - "5432:5432"
