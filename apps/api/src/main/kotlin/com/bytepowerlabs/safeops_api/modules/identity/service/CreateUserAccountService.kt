@@ -1,0 +1,34 @@
+package com.bytepowerlabs.safeops_api.modules.identity.service
+
+import com.bytepowerlabs.safeops_api.modules.identity.dto.CreateUserAccountRequest
+import com.bytepowerlabs.safeops_api.modules.identity.entity.UserAccountEntity
+import com.bytepowerlabs.safeops_api.modules.identity.exception.EmailAlreadyExistsException
+import com.bytepowerlabs.safeops_api.modules.identity.repository.UserRepository
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+
+@Service
+class CreateUserAccountService(private val repository: UserRepository, private val passwordEncoder: PasswordEncoder) {
+    @Transactional
+    fun execute(request: CreateUserAccountRequest) {
+        val name = request.name.trim().lowercase()
+        val email = request.email.trim().lowercase()
+
+        val userAccount = repository.existsByEmail(request.email)
+
+        if (!userAccount) {
+            throw EmailAlreadyExistsException()
+        }
+
+        val passwordHash = passwordEncoder.encode(request.password)
+
+        val userAccountEntity = UserAccountEntity(
+            name = name,
+            email = email,
+            passwordHash = passwordHash
+        )
+
+        repository.save(userAccountEntity)
+    }
+}
