@@ -14,6 +14,5 @@ data class CreateUserAccountRequest(
     val email: String,
 
     @NotBlank(message = "Password cannot be blank")
-    @Length(min = 8, message = "Password must have a minimum of 8 characters")
     val password: String
 )
