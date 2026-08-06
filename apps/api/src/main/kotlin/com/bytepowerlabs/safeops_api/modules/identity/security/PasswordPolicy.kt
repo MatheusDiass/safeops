@@ -1,4 +1,4 @@
-package com.bytepowerlabs.safeops_api.modules.identity
+package com.bytepowerlabs.safeops_api.modules.identity.security
 
 import com.bytepowerlabs.safeops_api.modules.identity.exception.InvalidPasswordException
 import org.springframework.stereotype.Component

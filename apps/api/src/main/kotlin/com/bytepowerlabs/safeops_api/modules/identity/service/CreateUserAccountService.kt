@@ -1,6 +1,6 @@
 package com.bytepowerlabs.safeops_api.modules.identity.service
 
-import com.bytepowerlabs.safeops_api.modules.identity.PasswordPolicy
+import com.bytepowerlabs.safeops_api.modules.identity.security.PasswordPolicy
 import com.bytepowerlabs.safeops_api.modules.identity.dto.CreateUserAccountRequest
 import com.bytepowerlabs.safeops_api.modules.identity.entity.UserAccountEntity
 import com.bytepowerlabs.safeops_api.modules.identity.exception.EmailAlreadyExistsException

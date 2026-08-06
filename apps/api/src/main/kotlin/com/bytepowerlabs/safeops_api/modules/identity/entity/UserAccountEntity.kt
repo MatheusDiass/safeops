@@ -16,7 +16,7 @@ import kotlin.uuid.toJavaUuid
 class UserAccountEntity(
     @Id
     @Column(name = "id", nullable = false, updatable = false)
-    private var id: UUID = Uuid.generateV7().toJavaUuid(),
+    var id: UUID = Uuid.generateV7().toJavaUuid(),
 
     @Column(name = "name", nullable = false, length = 100)
     var name: String,
