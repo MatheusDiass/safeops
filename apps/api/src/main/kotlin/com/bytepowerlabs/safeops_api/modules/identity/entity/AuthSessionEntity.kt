@@ -37,9 +37,14 @@ class AuthSessionEntity (
     @Column(name = "last_used_at", nullable = true, updatable = false)
     val lastUsedAt: Instant? = null,
 
-    @Column(name = "revoke_at", nullable = true, updatable = false)
-    val revokeAt: Instant? = null,
-
     @Column(name = "created_at", nullable = false, updatable = false)
     val createdAt: Instant,
-)
+) {
+    @Column(name = "revoke_at", nullable = true, updatable = false)
+    var revokeAt: Instant? = null
+        protected set
+
+    fun revoke() {
+        revokeAt = Instant.now()
+    }
+}

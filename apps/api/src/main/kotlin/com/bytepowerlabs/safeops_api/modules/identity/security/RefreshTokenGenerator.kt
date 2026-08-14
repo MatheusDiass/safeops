@@ -28,7 +28,7 @@ class RefreshTokenGenerator {
         )
     }
 
-    private fun hash(value: String): String {
+    fun hash(value: String): String {
         val digest = MessageDigest.getInstance("SHA-256").digest(value.toByteArray(StandardCharset.UTF_8))
         return HexFormat.of().formatHex(digest)
     }

@@ -19,7 +19,6 @@ data class JwtKeyProperties(
 )
 
 @Configuration
-@EnableConfigurationProperties(JwtKeyProperties::class)
 class JwtConfig(private val jwtProperties: JwtKeyProperties) {
     @Bean
     fun jwtEncoder(): JwtEncoder {
