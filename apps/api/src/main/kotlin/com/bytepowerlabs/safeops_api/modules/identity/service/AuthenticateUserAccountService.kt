@@ -1,7 +1,7 @@
 package com.bytepowerlabs.safeops_api.modules.identity.service
 
 import com.bytepowerlabs.safeops_api.modules.identity.dto.AuthenticateUserAccountRequest
-import com.bytepowerlabs.safeops_api.modules.identity.dto.AuthenticateUserAccountResponse
+import com.bytepowerlabs.safeops_api.modules.identity.dto.AuthenticateUserAccountResult
 import com.bytepowerlabs.safeops_api.modules.identity.entity.AccountStatus
 import com.bytepowerlabs.safeops_api.modules.identity.entity.AuthSessionEntity
 import com.bytepowerlabs.safeops_api.modules.identity.exception.InvalidCredentialsException
@@ -25,7 +25,7 @@ class AuthenticateUserAccountService(
     private val jwtTokenGenerator: JwtTokenGenerator
 ) {
     @Transactional
-    fun execute(request: AuthenticateUserAccountRequest): AuthenticateUserAccountResponse {
+    fun execute(request: AuthenticateUserAccountRequest): AuthenticateUserAccountResult {
         val userAccount = userRepository.findByEmail(request.email) ?: throw InvalidCredentialsException()
 
         if (!passwordEncoder.matches(request.password, userAccount.passwordHash)) {
@@ -52,7 +52,7 @@ class AuthenticateUserAccountService(
 
         val accessToken = jwtTokenGenerator.generate(userAccount.id, savedAuthSession.id)
 
-        return AuthenticateUserAccountResponse(
+        return AuthenticateUserAccountResult(
             accessToken = accessToken.token,
             accessTokenExpiresAt = accessToken.expiresAt,
             refreshToken = refreshToken.value,
