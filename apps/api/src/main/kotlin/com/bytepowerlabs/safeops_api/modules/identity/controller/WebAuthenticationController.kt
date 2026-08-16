@@ -4,6 +4,7 @@ import com.bytepowerlabs.safeops_api.config.properties.RefreshTokenCookiePropert
 import com.bytepowerlabs.safeops_api.modules.identity.dto.AuthenticateUserAccountRequest
 import com.bytepowerlabs.safeops_api.modules.identity.dto.AuthenticateUserAccountResponse
 import com.bytepowerlabs.safeops_api.modules.identity.service.AuthenticateUserAccountService
+import com.bytepowerlabs.safeops_api.modules.identity.service.RefreshAuthSessionService
 import com.bytepowerlabs.safeops_api.modules.identity.service.RevokeAuthSessionService
 import jakarta.servlet.http.HttpServletResponse
 import jakarta.validation.Valid
@@ -22,8 +23,9 @@ import java.time.Instant
 @RestController
 @RequestMapping("/identity/auth/web")
 class WebAuthenticationController(
-    private val revokeAuthSessionService: RevokeAuthSessionService,
     private val authenticateUserAccountService: AuthenticateUserAccountService,
+    private val refreshAuthSessionService: RefreshAuthSessionService,
+    private val revokeAuthSessionService: RevokeAuthSessionService,
     private val refreshTokenCookieProperties: RefreshTokenCookieProperties
 ) {
     companion object {
@@ -32,12 +34,31 @@ class WebAuthenticationController(
     }
 
     @PostMapping("/login")
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseStatus(HttpStatus.OK)
     fun login(
         @Valid @RequestBody request: AuthenticateUserAccountRequest,
         response: HttpServletResponse
     ): AuthenticateUserAccountResponse {
         val result = authenticateUserAccountService.execute(request)
+
+        response.addHeader(
+            HttpHeaders.SET_COOKIE,
+            createRefreshTokenCookie(result.refreshToken, result.refreshTokenExpiresAt).toString()
+        )
+
+        return AuthenticateUserAccountResponse(
+            accessToken = result.accessToken,
+            accessTokenExpiresAt = result.accessTokenExpiresAt,
+        )
+    }
+
+    @PostMapping("/refresh")
+    @ResponseStatus(HttpStatus.OK)
+    fun refresh(
+        @CookieValue(COOKIE_NAME, required = true) refreshToken: String,
+        response: HttpServletResponse
+    ): AuthenticateUserAccountResponse {
+        val result = refreshAuthSessionService.execute(refreshToken)
 
         response.addHeader(
             HttpHeaders.SET_COOKIE,

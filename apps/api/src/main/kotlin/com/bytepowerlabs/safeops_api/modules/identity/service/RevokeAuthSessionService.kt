@@ -1,10 +1,8 @@
 package com.bytepowerlabs.safeops_api.modules.identity.service
 
-import com.bytepowerlabs.safeops_api.modules.identity.repository.AuthSessionRepository
 import com.bytepowerlabs.safeops_api.modules.identity.repository.RefreshTokenRepository
 import com.bytepowerlabs.safeops_api.modules.identity.security.RefreshTokenGenerator
 import jakarta.transaction.Transactional
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
 @Service

@@ -39,7 +39,7 @@ class AuthSessionEntity (
     @JoinColumn(name = "user_account_id", nullable = false, updatable = false)
     var userAccount: UserAccountEntity,
 ) {
-    @Column(name = "revoked_at", nullable = true, updatable = false)
+    @Column(name = "revoked_at", nullable = true, updatable = true)
     var revokedAt: Instant? = null
         protected set
 

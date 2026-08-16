@@ -24,6 +24,8 @@ class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/identity/users").permitAll()
                 .requestMatchers(HttpMethod.POST, "/identity/auth/web/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/identity/auth/web/refresh").permitAll()
+                .requestMatchers(HttpMethod.POST, "/identity/auth/web/logout").permitAll()
                 .requestMatchers(HttpMethod.GET, "/actuator/health/**").permitAll()
                 .anyRequest().authenticated()
         }.oauth2ResourceServer {
