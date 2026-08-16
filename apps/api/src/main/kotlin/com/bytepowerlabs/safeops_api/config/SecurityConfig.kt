@@ -23,7 +23,7 @@ class SecurityConfig {
             it.dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/identity/users").permitAll()
-                .requestMatchers(HttpMethod.POST, "/identity/authenticate").permitAll()
+                .requestMatchers(HttpMethod.POST, "/identity/auth/web/login").permitAll()
                 .requestMatchers(HttpMethod.GET, "/actuator/health/**").permitAll()
                 .anyRequest().authenticated()
         }.oauth2ResourceServer {

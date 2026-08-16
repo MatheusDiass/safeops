@@ -7,27 +7,20 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
-import java.net.InetAddress
-import java.util.UUID
 import java.time.Instant
+import java.util.UUID
 import kotlin.uuid.Uuid
 import kotlin.uuid.toJavaUuid
 
 @Entity
-@Table(schema = "identity", name = "auth_session")
-class AuthSessionEntity (
+@Table(schema = "identity", name = "refresh_token")
+class RefreshTokenEntity(
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     var id: UUID = Uuid.generateV7().toJavaUuid(),
 
-    @Column(name = "device_name", nullable = true, updatable = false)
-    var deviceName: String? = null,
-
-    @Column(name = "user_agent", nullable = true, updatable = false)
-    var userAgent: String? = null,
-
-    @Column(name = "ip_address", nullable = true, updatable = false)
-    var ipAddress: InetAddress? = null,
+    @Column(name = "token_hash", nullable = false, updatable = false)
+    var tokenHash: String,
 
     @Column(name = "expires_at", nullable = false, updatable = false)
     var expiresAt: Instant,
@@ -36,14 +29,14 @@ class AuthSessionEntity (
     var createdAt: Instant = Instant.now(),
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_account_id", nullable = false, updatable = false)
-    var userAccount: UserAccountEntity,
+    @JoinColumn(name = "auth_session_id", nullable = false, updatable = false)
+    var authSession: AuthSessionEntity,
 ) {
-    @Column(name = "revoked_at", nullable = true, updatable = false)
-    var revokedAt: Instant? = null
+    @Column(name = "used_at", nullable = true, updatable = true)
+    var usedAt: Instant? = null
         protected set
 
-    fun revoke() {
-        revokedAt = Instant.now()
+    fun markAsUsed() {
+        usedAt = Instant.now()
     }
 }

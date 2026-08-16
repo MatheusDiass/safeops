@@ -2,8 +2,8 @@ package com.bytepowerlabs.safeops_api.modules.identity.repository
 
 import com.bytepowerlabs.safeops_api.modules.identity.entity.AuthSessionEntity
 import org.springframework.data.jpa.repository.JpaRepository
+import java.util.Optional
 import java.util.UUID
 
 interface AuthSessionRepository : JpaRepository<AuthSessionEntity, UUID> {
-    fun findByRefreshTokenHash(refreshTokenHash: String): AuthSessionEntity?
 }

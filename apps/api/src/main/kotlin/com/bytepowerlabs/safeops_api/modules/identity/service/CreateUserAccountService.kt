@@ -17,7 +17,7 @@ class CreateUserAccountService(
 ) {
     @Transactional
     fun execute(request: CreateUserAccountRequest) {
-        val name = request.name.trim().lowercase()
+        val name = request.name.trim()
         val email = request.email.trim().lowercase()
 
         val userAccount = repository.existsByEmail(request.email)
