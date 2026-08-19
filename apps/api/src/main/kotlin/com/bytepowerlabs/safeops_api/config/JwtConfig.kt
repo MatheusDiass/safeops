@@ -30,7 +30,7 @@ class JwtConfig(private val jwtProperties: JwtKeyProperties) {
     @Bean
     fun jwtDecoder(): JwtDecoder {
         val decoder = NimbusJwtDecoder.withPublicKey(jwtProperties.publicKey).build()
-        decoder.setJwtValidator(JwtValidators.createDefaultWithIssuer("safeops-api-key"))
+        decoder.setJwtValidator(JwtValidators.createDefaultWithIssuer("safeops-api"))
         return decoder
     }
 }
