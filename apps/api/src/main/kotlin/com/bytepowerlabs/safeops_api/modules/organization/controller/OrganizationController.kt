@@ -1,9 +1,10 @@
 package com.bytepowerlabs.safeops_api.modules.organization.controller
 
 import com.bytepowerlabs.safeops_api.modules.organization.dto.CreateOrganizationRequest
-import com.bytepowerlabs.safeops_api.modules.organization.dto.GetOrganizationResponse
+import com.bytepowerlabs.safeops_api.modules.organization.dto.OrganizationResponse
 import com.bytepowerlabs.safeops_api.modules.organization.service.CreateOrganizationService
 import com.bytepowerlabs.safeops_api.modules.organization.service.GetOrganizationService
+import com.bytepowerlabs.safeops_api.modules.organization.service.ListOrganizationsService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -21,7 +22,8 @@ import java.util.UUID
 @RequestMapping("/organizations")
 class OrganizationController(
     private val createOrganizationService: CreateOrganizationService,
-    private val getOrganizationService: GetOrganizationService
+    private val getOrganizationService: GetOrganizationService,
+    private val listOrganizationsService: ListOrganizationsService
 ) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -33,10 +35,15 @@ class OrganizationController(
     fun getOrganization(
         @PathVariable organizationId: UUID,
         @AuthenticationPrincipal jwt: Jwt
-    ): GetOrganizationResponse {
+    ): OrganizationResponse {
         return getOrganizationService.execute(
             organizationId = organizationId,
             userAccountId = UUID.fromString(jwt.subject)
         )
+    }
+
+    @GetMapping
+    fun listOrganizations(@AuthenticationPrincipal jwt: Jwt): List<OrganizationResponse> {
+        return listOrganizationsService.execute(UUID.fromString(jwt.subject))
     }
 }

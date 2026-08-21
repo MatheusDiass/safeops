@@ -4,7 +4,7 @@ import com.bytepowerlabs.safeops_api.modules.organization.entity.OrganizationSta
 import java.time.Instant
 import java.util.UUID
 
-data class GetOrganizationResponse(
+data class OrganizationResponse(
     val id: UUID,
     val name: String,
     val status: OrganizationStatus,
