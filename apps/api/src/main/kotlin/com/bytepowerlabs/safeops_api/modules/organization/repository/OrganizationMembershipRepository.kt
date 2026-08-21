@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 import java.util.UUID
 
 interface OrganizationMembershipRepository : JpaRepository<OrganizationMembershipEntity, UUID> {
+    fun findByOrganizationIdAndUserAccountId(organizationId: UUID, userAccountId: UUID): OrganizationMembershipEntity?
 }
