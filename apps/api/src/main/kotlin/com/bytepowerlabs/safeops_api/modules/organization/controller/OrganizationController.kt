@@ -2,14 +2,17 @@ package com.bytepowerlabs.safeops_api.modules.organization.controller
 
 import com.bytepowerlabs.safeops_api.modules.organization.dto.CreateOrganizationRequest
 import com.bytepowerlabs.safeops_api.modules.organization.dto.OrganizationResponse
+import com.bytepowerlabs.safeops_api.modules.organization.dto.UpdateOrganizationRequest
 import com.bytepowerlabs.safeops_api.modules.organization.service.CreateOrganizationService
 import com.bytepowerlabs.safeops_api.modules.organization.service.GetOrganizationService
 import com.bytepowerlabs.safeops_api.modules.organization.service.ListOrganizationsService
+import com.bytepowerlabs.safeops_api.modules.organization.service.UpdateOrganizationService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -23,7 +26,8 @@ import java.util.UUID
 class OrganizationController(
     private val createOrganizationService: CreateOrganizationService,
     private val getOrganizationService: GetOrganizationService,
-    private val listOrganizationsService: ListOrganizationsService
+    private val listOrganizationsService: ListOrganizationsService,
+    private val updateOrganizationService: UpdateOrganizationService,
 ) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -45,5 +49,19 @@ class OrganizationController(
     @GetMapping
     fun listOrganizations(@AuthenticationPrincipal jwt: Jwt): List<OrganizationResponse> {
         return listOrganizationsService.execute(UUID.fromString(jwt.subject))
+    }
+
+    @PatchMapping("/{organizationId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun updateOrganization(
+        @PathVariable organizationId: UUID,
+        @Valid @RequestBody request: UpdateOrganizationRequest,
+        @AuthenticationPrincipal jwt: Jwt
+    ) {
+        updateOrganizationService.execute(
+            organizationId = organizationId,
+            userAccountId = UUID.fromString(jwt.subject),
+            request = request
+        )
     }
 }

@@ -30,4 +30,10 @@ class OrganizationEntity(
 
     @Column(name = "updated_at")
     var updatedAt: Instant? = null,
-)
+) {
+    fun update(name: String?, status: OrganizationStatus?) {
+        name?.let { this.name = name }
+        status?.let { this.status = status }
+        updatedAt = Instant.now()
+    }
+}
