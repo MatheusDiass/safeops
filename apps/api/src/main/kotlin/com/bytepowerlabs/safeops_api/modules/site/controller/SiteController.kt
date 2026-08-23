@@ -2,14 +2,17 @@ package com.bytepowerlabs.safeops_api.modules.site.controller
 
 import com.bytepowerlabs.safeops_api.modules.site.dto.CreateSiteRequest
 import com.bytepowerlabs.safeops_api.modules.site.dto.SiteResponse
+import com.bytepowerlabs.safeops_api.modules.site.dto.UpdateSiteRequest
 import com.bytepowerlabs.safeops_api.modules.site.service.CreateSiteService
 import com.bytepowerlabs.safeops_api.modules.site.service.GetSiteService
 import com.bytepowerlabs.safeops_api.modules.site.service.ListSitesService
+import com.bytepowerlabs.safeops_api.modules.site.service.UpdateSiteService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -24,6 +27,7 @@ class SiteController(
     private val createSiteService: CreateSiteService,
     private val getSiteService: GetSiteService,
     private val listSitesService: ListSitesService,
+    private val updateSiteService: UpdateSiteService,
 ) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -55,5 +59,21 @@ class SiteController(
     @GetMapping
     fun listSites(@PathVariable organizationId: UUID, @AuthenticationPrincipal jwt: Jwt): List<SiteResponse> {
         return listSitesService.execute(organizationId = organizationId, userAccountId = UUID.fromString(jwt.subject))
+    }
+
+    @PatchMapping("/{siteId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun updateSite(
+        @PathVariable organizationId: UUID,
+        @PathVariable siteId: UUID,
+        @Valid @RequestBody request: UpdateSiteRequest,
+        @AuthenticationPrincipal jwt: Jwt
+    ) {
+        updateSiteService.execute(
+            organizationId = organizationId,
+            siteId = siteId,
+            request = request,
+            userAccountId = UUID.fromString(jwt.subject)
+        )
     }
 }

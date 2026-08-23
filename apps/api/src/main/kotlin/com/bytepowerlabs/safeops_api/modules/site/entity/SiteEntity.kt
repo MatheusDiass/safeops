@@ -38,4 +38,10 @@ class SiteEntity (
 
     @Column(name = "updated_at")
     var updatedAt: Instant? = null,
-)
+) {
+    fun update(name: String?, status: SiteStatus?) {
+        name?.let { this.name = name }
+        status?.let { this.status = status }
+        updatedAt = Instant.now()
+    }
+}
