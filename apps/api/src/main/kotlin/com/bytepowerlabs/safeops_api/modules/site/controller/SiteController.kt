@@ -4,6 +4,7 @@ import com.bytepowerlabs.safeops_api.modules.site.dto.CreateSiteRequest
 import com.bytepowerlabs.safeops_api.modules.site.dto.SiteResponse
 import com.bytepowerlabs.safeops_api.modules.site.service.CreateSiteService
 import com.bytepowerlabs.safeops_api.modules.site.service.GetSiteService
+import com.bytepowerlabs.safeops_api.modules.site.service.ListSitesService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -22,6 +23,7 @@ import java.util.UUID
 class SiteController(
     private val createSiteService: CreateSiteService,
     private val getSiteService: GetSiteService,
+    private val listSitesService: ListSitesService,
 ) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -48,5 +50,10 @@ class SiteController(
             siteId = siteId,
             userAccountId = UUID.fromString(jwt.subject)
         )
+    }
+
+    @GetMapping
+    fun listSites(@PathVariable organizationId: UUID, @AuthenticationPrincipal jwt: Jwt): List<SiteResponse> {
+        return listSitesService.execute(organizationId = organizationId, userAccountId = UUID.fromString(jwt.subject))
     }
 }

@@ -6,4 +6,5 @@ import java.util.UUID
 
 interface SiteRepository : JpaRepository<SiteEntity, UUID> {
     fun findByIdAndOrganizationId(id: UUID, organizationId: UUID): SiteEntity?
+    fun findAllByOrganizationId(organizationId: UUID): List<SiteEntity>
 }
