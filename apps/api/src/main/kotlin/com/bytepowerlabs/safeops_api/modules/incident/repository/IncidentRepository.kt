@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 import java.util.UUID
 
 interface IncidentRepository : JpaRepository<IncidentEntity, UUID> {
+    fun findByIdAndOrganizationIdAndSiteId(id: UUID, organizationId: UUID, siteId: UUID): IncidentEntity?
 }
