@@ -4,6 +4,7 @@ import com.bytepowerlabs.safeops_api.modules.incident.dto.CreateIncidentRequest
 import com.bytepowerlabs.safeops_api.modules.incident.dto.IncidentResponse
 import com.bytepowerlabs.safeops_api.modules.incident.service.CreateIncidentService
 import com.bytepowerlabs.safeops_api.modules.incident.service.GetIncidentService
+import com.bytepowerlabs.safeops_api.modules.incident.service.ListIncidentsService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -21,7 +22,8 @@ import java.util.UUID
 @RequestMapping("/organizations/{organizationId}/sites/{siteId}/incidents")
 class IncidentController(
     private val createIncidentService: CreateIncidentService,
-    private val getIncidentService: GetIncidentService
+    private val getIncidentService: GetIncidentService,
+    private val listIncidentsService: ListIncidentsService,
 ) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -50,6 +52,19 @@ class IncidentController(
             organizationId = organizationId,
             siteId = siteId,
             incidentId = incidentId,
+            userAccountId = UUID.fromString(jwt.subject)
+        )
+    }
+
+    @GetMapping
+    fun listIncidents(
+        @PathVariable organizationId: UUID,
+        @PathVariable siteId: UUID,
+        @AuthenticationPrincipal jwt: Jwt
+    ): List<IncidentResponse> {
+        return listIncidentsService.execute(
+            organizationId = organizationId,
+            siteId = siteId,
             userAccountId = UUID.fromString(jwt.subject)
         )
     }
