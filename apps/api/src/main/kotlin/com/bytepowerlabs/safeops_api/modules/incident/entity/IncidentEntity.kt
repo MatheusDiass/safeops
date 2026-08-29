@@ -71,4 +71,23 @@ class IncidentEntity(
 
     @Column(name = "updated_at", nullable = false)
     var updatedAt: Instant = Instant.now(),
-)
+) {
+    fun update(
+        title: String?,
+        description: String?,
+        type: IncidentType?,
+        severity: IncidentSeverity?,
+        occurredAt: Instant?,
+        location: String?,
+        immediateActions: String?,
+    ) {
+        title?.let { this.title = title }
+        description?.let { this.description = description }
+        type?.let { this.type = type }
+        severity?.let { this.severity = it }
+        occurredAt?.let { this.occurredAt = it }
+        location?.let { this.location = location }
+        immediateActions?.let { this.immediateActions = it }
+        updatedAt = Instant.now()
+    }
+}
