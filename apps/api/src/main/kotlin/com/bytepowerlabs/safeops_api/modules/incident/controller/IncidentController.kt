@@ -3,10 +3,12 @@ package com.bytepowerlabs.safeops_api.modules.incident.controller
 import com.bytepowerlabs.safeops_api.modules.incident.dto.CreateIncidentRequest
 import com.bytepowerlabs.safeops_api.modules.incident.dto.IncidentResponse
 import com.bytepowerlabs.safeops_api.modules.incident.dto.UpdateIncidentRequest
+import com.bytepowerlabs.safeops_api.modules.incident.dto.UpdateIncidentStatusRequest
 import com.bytepowerlabs.safeops_api.modules.incident.service.CreateIncidentService
 import com.bytepowerlabs.safeops_api.modules.incident.service.GetIncidentService
 import com.bytepowerlabs.safeops_api.modules.incident.service.ListIncidentsService
 import com.bytepowerlabs.safeops_api.modules.incident.service.UpdateIncidentService
+import com.bytepowerlabs.safeops_api.modules.incident.service.UpdateIncidentStatusService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -28,6 +30,7 @@ class IncidentController(
     private val getIncidentService: GetIncidentService,
     private val listIncidentsService: ListIncidentsService,
     private val updateIncidentService: UpdateIncidentService,
+    private val updateIncidentStatusService: UpdateIncidentStatusService
 ) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -88,6 +91,24 @@ class IncidentController(
             incidentId = incidentId,
             userAccountId = UUID.fromString(jwt.subject),
             request = request,
+        )
+    }
+
+    @PatchMapping("/{incidentId}/status")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun updateIncidentStatus(
+        @PathVariable organizationId: UUID,
+        @PathVariable siteId: UUID,
+        @PathVariable incidentId: UUID,
+        @Valid @RequestBody request: UpdateIncidentStatusRequest,
+        @AuthenticationPrincipal jwt: Jwt
+    ) {
+        updateIncidentStatusService.execute(
+            organizationId = organizationId,
+            siteId = siteId,
+            incidentId = incidentId,
+            userAccountId = UUID.fromString(jwt.subject),
+            request = request
         )
     }
 }

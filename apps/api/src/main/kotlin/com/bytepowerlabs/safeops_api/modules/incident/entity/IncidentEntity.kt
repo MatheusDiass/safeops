@@ -1,6 +1,7 @@
 package com.bytepowerlabs.safeops_api.modules.incident.entity
 
 import com.bytepowerlabs.safeops_api.modules.identity.entity.UserAccountEntity
+import com.bytepowerlabs.safeops_api.modules.incident.exception.InvalidIncidentStatusTransitionException
 import com.bytepowerlabs.safeops_api.modules.organization.entity.OrganizationEntity
 import com.bytepowerlabs.safeops_api.modules.site.entity.SiteEntity
 import jakarta.persistence.Column
@@ -89,5 +90,27 @@ class IncidentEntity(
         location?.let { this.location = location }
         immediateActions?.let { this.immediateActions = it }
         updatedAt = Instant.now()
+    }
+
+    fun updateStatus(newStatus: IncidentStatus) {
+        if (newStatus == status) {
+            return
+        }
+
+        if (!status.canTransitionTo(newStatus)) {
+            throw InvalidIncidentStatusTransitionException(
+                currentStatus = status,
+                newStatus = newStatus
+            )
+        }
+
+        val now = Instant.now()
+
+        status = newStatus
+        closedAt =
+            if (newStatus == IncidentStatus.CLOSED) now
+            else null
+
+        updatedAt = now
     }
 }

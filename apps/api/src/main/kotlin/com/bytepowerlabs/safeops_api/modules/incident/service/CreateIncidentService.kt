@@ -1,6 +1,6 @@
 package com.bytepowerlabs.safeops_api.modules.incident.service
 
-import com.bytepowerlabs.safeops_api.modules.incident.IncidentOccurrenceDateInFutureException
+import com.bytepowerlabs.safeops_api.modules.incident.exception.IncidentOccurrenceDateInFutureException
 import com.bytepowerlabs.safeops_api.modules.incident.dto.CreateIncidentRequest
 import com.bytepowerlabs.safeops_api.modules.incident.entity.IncidentEntity
 import com.bytepowerlabs.safeops_api.modules.incident.repository.IncidentRepository
