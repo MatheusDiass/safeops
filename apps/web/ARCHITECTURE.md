@@ -13,7 +13,7 @@ The architecture favors:
 - predictable module structure
 - simple Vue composition
 - limited global state
-- reusable UI primitives
+- consistent UI composition
 - gradual extraction of shared behavior
 
 The frontend does not attempt to reproduce backend Clean Architecture layer by layer.
@@ -27,9 +27,9 @@ Frontend structure follows UI and feature responsibilities.
 ```text
 src/
 ├── app/
+│   └── theme/
 ├── assets/
 ├── components/
-│   └── ui/
 ├── layouts/
 ├── modules/
 ├── shared/
@@ -48,6 +48,8 @@ Examples:
 app/
 ├── router/
 │   └── index.ts
+├── theme/
+│   └── safeops.preset.ts
 └── App.vue
 ```
 
@@ -58,6 +60,7 @@ Possible responsibilities include:
 - route guards
 - plugin installation
 - global application initialization
+- application-wide PrimeVue theme configuration
 
 Feature behavior must not be implemented here.
 
@@ -100,49 +103,62 @@ Example:
 modules/incident/components/IncidentStatusBadge.vue
 ```
 
-should not be placed under:
-
-```text
-components/ui/
-```
-
-because the concept of incident status belongs to the Incidents feature.
+should not be placed under `src/components/` because the concept of incident status belongs to the Incidents feature.
 
 ---
 
-# `components/ui/`
+# `components/`
 
-Contains application-wide UI primitives.
+Contains reusable SafeOps application-level components when genuine cross-feature reuse exists.
 
 Examples:
 
 ```text
-components/ui/
-├── AppButton.vue
-├── AppInput.vue
-├── AppTextarea.vue
-├── AppSelect.vue
-├── AppModal.vue
-└── AppSpinner.vue
+components/
+├── PageHeader.vue
+└── EmptyState.vue
 ```
 
-These components must not depend on SafeOps domain concepts.
+Generic UI primitives come directly from PrimeVue. Do not require a `components/ui/` directory and do not add components such as `AppButton` or `AppInput` merely to proxy PrimeVue.
 
-An `AppButton` may know about:
+Feature-specific components remain inside their modules.
 
-- variants
-- loading
-- disabled state
-- icons
+---
 
-It must not know about:
+# UI Architecture
 
-- incidents
-- organizations
-- sites
-- authentication rules
+PrimeVue 4 in Styled Mode is the official UI foundation.
 
-Domain-specific components belong to their modules.
+```text
+SafeOps Theme
+    ↓
+PrimeVue Components
+    ↓
+SafeOps Feature Components
+    ↓
+Pages
+```
+
+PrimeVue provides generic controls. SafeOps components provide domain semantics or meaningful application-specific composition.
+
+```text
+IncidentForm
+    ↓
+PrimeVue InputText
+PrimeVue Select
+PrimeVue DatePicker
+PrimeVue Button
+```
+
+```text
+IncidentTable
+    ↓
+PrimeVue DataTable
+```
+
+The application-wide custom PrimeVue preset belongs under `src/app/theme/`, for example `src/app/theme/safeops.preset.ts`. It is based on an official PrimeVue preset and customized through design tokens.
+
+Detailed UI and theming rules are documented in `docs/design-system.md`.
 
 ---
 
@@ -202,20 +218,33 @@ Prefer:
 
 # Dependency Direction
 
-Preferred dependency direction:
+Preferred UI composition direction:
 
 ```text
-pages
-  ↓
-feature components
-  ↓
-feature composables
-  ↓
-feature API
-
-shared UI / shared utilities
-may be consumed where appropriate
+SafeOps Theme
+    ↓
+PrimeVue Components
+    ↓
+SafeOps Feature Components
+    ↓
+Pages
 ```
+
+Preferred behavior and data direction:
+
+```text
+Page
+    ↓
+Composable
+    ↓
+Feature API
+    ↓
+Shared HTTP Client
+    ↓
+SafeOps Backend
+```
+
+Shared application components and utilities may be consumed where appropriate.
 
 This is not a strict layered architecture, but dependencies should remain understandable.
 
@@ -404,15 +433,13 @@ Example:
 shared/composables/useDebounce.ts
 ```
 
-## UI primitive
+## Generic UI primitive
 
-For domain-independent visual components.
+Use the corresponding PrimeVue component directly.
 
-Example:
+Examples include `Button`, `InputText`, `Select`, `Dialog`, and `DataTable`.
 
-```text
-components/ui/AppModal.vue
-```
+Do not create an application wrapper that only renames or forwards a PrimeVue component API.
 
 Avoid premature extraction.
 

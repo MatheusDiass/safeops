@@ -51,6 +51,12 @@ Do not create one just to reduce component line count.
 
 Do not use composables as generic service classes.
 
+Do not create a composable merely to wrap trivial PrimeVue state owned by one component. For example, keep this state in the component instead of creating `useDialog()`:
+
+```ts
+const visible = ref(false);
+```
+
 Avoid:
 
 ```text
@@ -230,3 +236,23 @@ state shared across unrelated application areas
 ```
 
 A composable does not automatically require a store.
+
+---
+
+## Responsibility Boundaries
+
+```text
+Composable
+→ reactive Vue behavior
+
+Utility
+→ pure reusable function
+
+API
+→ HTTP communication
+
+Pinia
+→ genuinely shared application state
+```
+
+PrimeVue does not change these boundaries. Keep component-local interaction state local unless reuse or workflow complexity provides a concrete reason to extract it.

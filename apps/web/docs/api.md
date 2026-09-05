@@ -2,6 +2,20 @@
 
 HTTP communication is isolated from Vue components.
 
+```text
+Page / Component
+    ↓
+Composable
+    ↓
+Feature API
+    ↓
+src/shared/api/http.ts
+    ↓
+SafeOps Backend
+```
+
+PrimeVue must never appear in API modules.
+
 Feature endpoints belong under:
 
 ```text
@@ -115,10 +129,10 @@ Prefer explicit request and response types.
 Example:
 
 ```ts
-type CreateIncidentRequest {
+type CreateIncidentRequest = {
   title: string;
   description: string;
-}
+};
 ```
 
 Avoid using backend response objects as loosely typed dictionaries.

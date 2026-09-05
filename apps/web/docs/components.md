@@ -14,8 +14,8 @@ Examples:
 IncidentCard.vue
 IncidentForm.vue
 IncidentStatusBadge.vue
-AppButton.vue
-AppModal.vue
+PageHeader.vue
+EmptyState.vue
 ```
 
 Prefer descriptive multi-word names.
@@ -136,9 +136,9 @@ Prefer strongly typed props.
 Example:
 
 ```ts
-type Props {
+type Props = {
   incident: Incident;
-}
+};
 
 defineProps<Props>();
 ```
@@ -182,9 +182,8 @@ Use `defineModel` when the component naturally represents an editable value.
 Good examples:
 
 ```text
-AppInput
-AppSelect
-IncidentForm
+SiteSelector
+OrganizationSelector
 ```
 
 Avoid using two-way binding when explicit props/events make ownership clearer.
@@ -214,19 +213,66 @@ when these elements have no independent responsibility.
 
 ---
 
-## UI Components vs Feature Components
+## PrimeVue as the Generic UI Source
 
-Domain-independent:
+Before creating a generic interactive or visual component, check whether PrimeVue already provides it.
 
-```text
-src/components/ui/AppButton.vue
-src/components/ui/AppInput.vue
+Prefer direct use:
+
+```vue
+<Button />
+<InputText />
+<Select />
+<AutoComplete />
+<Dialog />
 ```
 
-Domain-specific:
+instead of application wrappers that add no meaningful behavior:
 
-```text
-src/modules/incident/components/IncidentStatusBadge.vue
+```vue
+<AppButton />
+<AppInput />
+<AppSelect />
+<AppAutocomplete />
+<AppDialog />
 ```
 
-A reusable UI primitive must not import domain concepts.
+PrimeVue provides generic UI primitives. Feature components and reusable application components should add SafeOps-specific semantics, behavior, composition, reuse, or presentation logic.
+
+---
+
+## PrimeVue Wrappers
+
+Bad:
+
+```text
+AppButton
+    → PrimeVue Button
+```
+
+This wrapper is not useful when it only forwards PrimeVue props, slots, and events or merely renames the component. Do not create wrappers solely to theoretically isolate PrimeVue.
+
+Good:
+
+```text
+IncidentStatusBadge
+    → PrimeVue Tag
+```
+
+`IncidentStatusBadge` is useful when it maps SafeOps incident statuses to consistent labels, severity, icons, and accessible presentation.
+
+Feature-specific components belong under:
+
+```text
+src/modules/<feature>/components/
+```
+
+Reusable SafeOps application-level components may belong under `src/components/` when they are genuinely used across features.
+
+---
+
+## Component Styling
+
+SCSS remains valid for custom component-specific presentation and layout. Prefer PrimeVue semantic and component design tokens before adding SCSS overrides, and avoid styling PrimeVue through its internal CSS classes when tokens can express the intended result.
+
+See `docs/design-system.md` for the complete styling priority and UI conventions.

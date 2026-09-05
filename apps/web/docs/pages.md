@@ -177,6 +177,29 @@ Avoid nearly identical `CreateXForm.vue` and `EditXForm.vue` components.
 
 ---
 
+## PrimeVue in Pages
+
+Pages may directly compose PrimeVue controls when the usage is small and remains part of page orchestration.
+
+Substantial domain UI should be extracted into feature components:
+
+```text
+IncidentListPage
+    ↓
+IncidentFilters
+IncidentTable
+```
+
+```text
+IncidentTable
+    ↓
+PrimeVue DataTable
+```
+
+Do not let a page become a large container of PrimeVue configuration when a domain-specific component would make the screen flow and ownership clearer.
+
+---
+
 ## Page Size
 
 There is no strict line limit.

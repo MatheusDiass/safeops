@@ -28,6 +28,32 @@ A module may contain:
 
 Only create directories currently required by the feature.
 
+Example:
+
+```text
+incident/
+├── api/
+│   └── incident.api.ts
+├── components/
+│   ├── IncidentForm.vue
+│   ├── IncidentTable.vue
+│   ├── IncidentFilters.vue
+│   └── IncidentStatusBadge.vue
+├── composables/
+│   ├── useIncidentList.ts
+│   ├── useIncidentDetails.ts
+│   └── useIncidentForm.ts
+├── pages/
+│   ├── IncidentListPage.vue
+│   ├── IncidentDetailsPage.vue
+│   ├── CreateIncidentPage.vue
+│   └── EditIncidentPage.vue
+└── types/
+    └── incident.types.ts
+```
+
+PrimeVue is an implementation detail used by feature components, not a module architecture layer. Do not add PrimeVue-specific folders to feature modules.
+
 ---
 
 ## Responsibilities

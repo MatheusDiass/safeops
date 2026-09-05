@@ -43,8 +43,19 @@ Test:
 Avoid testing:
 
 - Vue internals
+- PrimeVue internals
 - private implementation details
 - exact internal variable names
+
+PrimeVue is responsible for testing its generic components. Test SafeOps behavior around PrimeVue components instead of asserting how PrimeVue internally renders a `Button`, `Select`, `Dialog`, `DataTable`, or another primitive.
+
+Examples worth testing include:
+
+- `IncidentForm` emits or submits the expected SafeOps data
+- changing severity updates form state
+- `IncidentStatusBadge` maps SafeOps statuses correctly
+- permission-based actions are hidden or disabled appropriately
+- important workflows built with PrimeVue components behave correctly
 
 ---
 

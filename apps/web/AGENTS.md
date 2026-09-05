@@ -21,6 +21,7 @@ Use the existing project stack:
 - Vite
 - Vue Router
 - Pinia
+- PrimeVue 4 in Styled Mode
 - Composition API
 - `<script setup lang="ts">`
 - Axios
@@ -49,6 +50,7 @@ Implementation conventions:
 - `docs/composables.md`
 - `docs/api.md`
 - `docs/testing.md`
+- `docs/design-system.md`
 
 Do not duplicate architectural rules across documentation files.
 
@@ -95,9 +97,9 @@ Feature-specific code belongs under:
 
 `src/modules/<feature>/`
 
-Reusable UI primitives belong under:
+Reusable SafeOps application-level components belong under:
 
-`src/components/ui/`
+`src/components/`
 
 Cross-feature reusable logic belongs under:
 
@@ -141,6 +143,29 @@ Do not create a composable merely to reduce the number of lines in a Vue compone
 
 ---
 
+## UI Components and Styling
+
+PrimeVue 4 in Styled Mode is the official SafeOps UI component library.
+
+Before implementing a generic control, search PrimeVue for an existing component. Use PrimeVue directly for generic controls such as buttons, inputs, selects, dialogs, tables, menus, tabs, toasts, and tags.
+
+Do not create wrappers such as `AppButton`, `AppInput`, or `AppSelect` merely to rename PrimeVue components, proxy their APIs, or theoretically isolate the dependency.
+
+Create a SafeOps component only when it adds meaningful domain semantics, behavior, composition, reuse, or presentation logic.
+
+Prefer styling in this order:
+
+1. PrimeVue semantic design tokens
+2. PrimeVue component design tokens
+3. application-level SCSS
+4. component-scoped SCSS
+
+Do not globally override PrimeVue internal CSS classes when design tokens can express the change. Do not introduce another UI component library without an explicit architectural decision.
+
+Detailed UI and theming rules are documented in `docs/design-system.md`.
+
+---
+
 ## TypeScript
 
 Keep TypeScript strict.
@@ -152,6 +177,7 @@ When `any` is unavoidable, keep its scope minimal and document why.
 Prefer:
 
 - domain-specific types
+- `type` for domain models, DTOs, component props, aliases, unions, and ordinary object shapes
 - explicit public function types
 - `import type`
 - union types where appropriate
@@ -163,6 +189,8 @@ Avoid:
 - unnecessary non-null assertions
 - duplicated types representing the same API model
 - broad generic types when a domain type exists
+
+Use `interface` only when declaration merging or an intentionally interface-specific extension pattern is required.
 
 ---
 
@@ -253,6 +281,8 @@ Before creating a new:
 
 search the repository for an existing equivalent or established pattern.
 
+Before creating a generic interactive or visual component, also check whether PrimeVue already provides it.
+
 Prefer extending an existing convention over introducing a new competing pattern.
 
 ---
@@ -266,6 +296,8 @@ Before adding a dependency:
 3. Confirm the dependency has a clear architectural benefit.
 4. Prefer actively maintained packages.
 5. Avoid adding a package for trivial functionality.
+
+Another UI component library requires an explicit architectural decision.
 
 Do not add a new dependency silently when implementing an unrelated task.
 
