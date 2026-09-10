@@ -10,5 +10,6 @@
 
   "prettier.requireConfig": true,
 
-  "files.eol": "\n"
+  "files.eol": "\n",
+  "cSpell.words": ["inputtext", "primevue"]
 }

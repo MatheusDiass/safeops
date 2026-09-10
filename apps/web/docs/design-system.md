@@ -226,3 +226,53 @@ Use PrimeVue accessibility behavior whenever possible and preserve it when compo
 - use appropriate text, icons, or other non-color indicators
 
 Accessibility is part of the component behavior and must be considered during implementation and testing.
+
+# Design System
+
+## Color Palette
+
+### Brand
+
+- Primary: `#2563EB`
+- Primary Dark: `#1D4ED8`
+- Primary Light: `#3B82F6`
+- Primary Ultra Light: `#DBEAFE`
+
+### Neutral
+
+- Dark: `#0D1318`
+- Slate Dark: `#3E4653`
+- Slate: `#607585`
+- Slate Light: `#9498A2`
+
+### Surfaces
+
+- Background: `#F8FAFC`
+- Surface: `#FFFFFF`
+- Border: `#E2E8F0`
+
+### Semantic Colors
+
+- Success: `#16A34A`
+- Warning: `#F59E0B`
+- Danger: `#DC2626`
+- Info: `#0284C7`
+
+## Usage Rules
+
+- Blue is the main brand and action color.
+- Red must only be used for destructive actions, critical incidents, and errors.
+- Orange/yellow must be reserved for warnings and attention states.
+- Green must represent success, resolved items, or completed actions.
+- Neutral colors should be used for text, borders, backgrounds, and disabled states.
+- Do not use semantic colors as decorative brand colors.
+
+## AI Development Rules
+
+When generating frontend code:
+
+- Always follow the colors defined in this document.
+- Do not introduce new arbitrary colors.
+- Prefer semantic design tokens instead of hardcoded colors.
+- Reuse PrimeVue theme tokens whenever possible.
+- Keep incident severity colors consistent across all screens.
