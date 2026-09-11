@@ -7,7 +7,7 @@
       <div class="auth-layout__form-column">
         <a
           class="brand"
-          href="/"
+          href="/login"
           aria-label="SafeOps home"
           ><span
             class="brand__mark"

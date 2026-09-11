@@ -82,6 +82,6 @@ function handleSubmit(): void {
         fluid
       />
     </form>
-    <template #footer>Don't have an account? <a href="/register">Create one</a></template>
+    <template #footer>Don't have an account? <RouterLink to="/register">Create one</RouterLink></template>
   </AuthLayout>
 </template>

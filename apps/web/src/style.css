@@ -93,6 +93,14 @@ h1 {
   display: grid;
   gap: 0.4rem;
 }
+.field small {
+  color: #607585;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+.field .field-error {
+  color: #dc2626;
+}
 .field label,
 .remember-me {
   color: #3e4653;
