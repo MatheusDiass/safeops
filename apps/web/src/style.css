@@ -54,17 +54,6 @@ a:hover {
 .brand:hover {
   text-decoration: none;
 }
-.brand__mark {
-  display: grid;
-  width: 2.25rem;
-  height: 2.25rem;
-  place-items: center;
-  border-radius: 0.7rem;
-  background: #2563eb;
-  color: #fff;
-  box-shadow: 0 0.5rem 1.25rem #dbeafe;
-  font-size: 1.25rem;
-}
 h1 {
   margin: 0;
   font-size: clamp(1.625rem, 2.5vw, 1.875rem);

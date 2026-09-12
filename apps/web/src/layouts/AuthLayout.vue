@@ -1,3 +1,7 @@
+<script setup lang="ts">
+import SafeOpsMark from '../components/SafeOpsMark.vue';
+</script>
+
 <template>
   <main class="auth-layout">
     <section
@@ -9,11 +13,7 @@
           class="brand"
           href="/login"
           aria-label="SafeOps home"
-          ><span
-            class="brand__mark"
-            aria-hidden="true"
-            >✓</span
-          ><span>SafeOps</span></a
+          ><SafeOpsMark /><span>SafeOps</span></a
         >
         <h1 id="page-title"><slot name="title" /></h1>
         <p class="auth-layout__subtitle"><slot name="subtitle" /></p>

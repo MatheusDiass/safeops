@@ -1,11 +1,64 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import AppLayout from '../../layouts/AppLayout.vue';
 import LoginPage from '../../modules/auth/pages/LoginPage.vue';
 import RegisterPage from '../../modules/auth/pages/RegisterPage.vue';
+import WorkspacePage from '../../modules/workspace/pages/WorkspacePage.vue';
 
 export const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', redirect: '/login' },
+    {
+      path: '/',
+      component: AppLayout,
+      children: [
+        { path: '', redirect: { name: 'dashboard' } },
+        {
+          path: 'dashboard',
+          name: 'dashboard',
+          component: WorkspacePage,
+          meta: {
+            title: 'Dashboard',
+            description: 'Monitor safety performance across your organization and sites.',
+          },
+        },
+        {
+          path: 'organization',
+          name: 'organization',
+          component: WorkspacePage,
+          meta: {
+            title: 'Organization',
+            description: 'Manage your organization details and operational structure.',
+          },
+        },
+        {
+          path: 'sites',
+          name: 'sites',
+          component: WorkspacePage,
+          meta: {
+            title: 'Sites',
+            description: 'View and manage the sites connected to this organization.',
+          },
+        },
+        {
+          path: 'incidents',
+          name: 'incidents',
+          component: WorkspacePage,
+          meta: {
+            title: 'Incidents',
+            description: 'Review reported incidents and follow their response progress.',
+          },
+        },
+        {
+          path: 'account',
+          name: 'account',
+          component: WorkspacePage,
+          meta: {
+            title: 'Account',
+            description: 'Manage your personal account and preferences.',
+          },
+        },
+      ],
+    },
     { path: '/login', component: LoginPage },
     { path: '/register', component: RegisterPage },
   ],
