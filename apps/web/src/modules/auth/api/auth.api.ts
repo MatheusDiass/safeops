@@ -18,6 +18,10 @@ export async function refreshSession(): Promise<LoginResponse> {
   return response.data;
 }
 
+export async function logoutSession(): Promise<void> {
+  await http.post('/identity/auth/web/logout');
+}
+
 export async function registerUser(request: RegisterUserRequest): Promise<void> {
   await http.post('/identity/users', request);
 }

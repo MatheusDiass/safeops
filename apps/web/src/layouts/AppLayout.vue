@@ -3,12 +3,19 @@ import { mdiBellOutline, mdiLogoutVariant, mdiMagnify, mdiMenu } from '@mdi/js';
 import Button from 'primevue/button';
 import Drawer from 'primevue/drawer';
 import InputText from 'primevue/inputtext';
+import Message from 'primevue/message';
 import { ref } from 'vue';
 import AppSidebar from '../components/AppSidebar.vue';
 import SafeOpsMark from '../components/SafeOpsMark.vue';
+import { useLogout } from '../modules/auth/composables/useLogout';
 
 const isNavigationOpen = ref(false);
 const searchQuery = ref('');
+const { errorMessage, isLoggingOut, logout } = useLogout();
+
+function handleLogout(): void {
+  void logout();
+}
 </script>
 
 <template>
@@ -94,6 +101,9 @@ const searchQuery = ref('');
             outlined
             size="small"
             aria-label="Logout"
+            :loading="isLoggingOut"
+            :disabled="isLoggingOut"
+            @click="handleLogout"
           >
             <svg
               viewBox="0 0 24 24"
@@ -105,6 +115,14 @@ const searchQuery = ref('');
           </Button>
         </div>
       </header>
+
+      <Message
+        v-if="errorMessage"
+        class="app-layout__logout-error"
+        severity="error"
+      >
+        {{ errorMessage }}
+      </Message>
 
       <RouterView />
     </div>
@@ -127,6 +145,10 @@ const searchQuery = ref('');
 
 .app-layout__body {
   min-width: 0;
+}
+
+.app-layout__logout-error {
+  margin: 1rem clamp(1.25rem, 4vw, 4rem) 0;
 }
 
 .app-layout__topbar {

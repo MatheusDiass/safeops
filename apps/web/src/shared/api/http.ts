@@ -8,6 +8,7 @@ type ApiErrorBody = {
 const apiUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 const unauthenticatedEndpoints = new Set([
   '/identity/auth/web/login',
+  '/identity/auth/web/logout',
   '/identity/auth/web/refresh',
   '/identity/users',
 ]);
