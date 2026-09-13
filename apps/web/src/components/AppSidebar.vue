@@ -42,7 +42,7 @@ const selectedOrganization = computed(() =>
 
 const navigationItems: NavigationItem[] = [
   { label: 'Dashboard', routeName: 'dashboard', icon: mdiViewDashboardOutline },
-  { label: 'Organization', routeName: 'organization', icon: mdiOfficeBuildingOutline },
+  { label: 'Organizations', routeName: 'organization', icon: mdiOfficeBuildingOutline },
   { label: 'Sites', routeName: 'sites', icon: mdiMapMarkerMultipleOutline },
   { label: 'Incidents', routeName: 'incidents', icon: mdiAlertCircleOutline },
   { label: 'Account', routeName: 'account', icon: mdiAccountCircleOutline },
@@ -59,6 +59,10 @@ function getOrganizationInitials(organization: Organization): string {
     .slice(0, 2)
     .map((word) => word.charAt(0).toUpperCase())
     .join('');
+}
+
+function getSiteCountLabel(siteCount: number): string {
+  return `${siteCount} ${siteCount === 1 ? 'site' : 'sites'}`;
 }
 </script>
 
@@ -116,6 +120,7 @@ function getOrganizationInitials(organization: Organization): string {
             }}</span>
             <span class="organization-option__copy">
               <strong>{{ selectedOrganization.name }}</strong>
+              <span>{{ getSiteCountLabel(selectedOrganization.siteCount) }}</span>
             </span>
           </div>
         </template>
@@ -124,6 +129,7 @@ function getOrganizationInitials(organization: Organization): string {
             <span class="organization-option__initials">{{ getOrganizationInitials(option) }}</span>
             <span class="organization-option__copy">
               <strong>{{ option.name }}</strong>
+              <span>{{ getSiteCountLabel(option.siteCount) }}</span>
             </span>
           </div>
         </template>

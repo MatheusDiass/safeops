@@ -19,5 +19,6 @@
   "prettier.requireConfig": true,
 
   "files.eol": "\n",
-  "cSpell.words": ["inputtext", "primevue"]
+  "cSpell.words": ["inputtext", "primevue"],
+  "git.openRepositoryInParentFolders": "always"
 }
