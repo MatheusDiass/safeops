@@ -8,16 +8,12 @@ import {
   mdiViewDashboardOutline,
 } from '@mdi/js';
 import Select from 'primevue/select';
-import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { useOrganizationStore } from '../modules/organization/stores/organization.store';
+import type { Organization } from '../modules/organization/types/organization.types';
 import SafeOpsMark from './SafeOpsMark.vue';
-
-type Organization = {
-  id: string;
-  initials: string;
-  name: string;
-  siteCount: number;
-};
 
 type NavigationItem = {
   label: string;
@@ -38,31 +34,11 @@ const emit = defineEmits<{
 }>();
 
 const route = useRoute();
-
-const defaultOrganization: Organization = {
-  id: 'northstar-manufacturing',
-  initials: 'NM',
-  name: 'Northstar Manufacturing',
-  siteCount: 8,
-};
-
-const organizations: Organization[] = [
-  defaultOrganization,
-  {
-    id: 'atlas-construction',
-    initials: 'AC',
-    name: 'Atlas Construction',
-    siteCount: 5,
-  },
-  {
-    id: 'meridian-logistics',
-    initials: 'ML',
-    name: 'Meridian Logistics',
-    siteCount: 12,
-  },
-];
-
-const selectedOrganization = ref<Organization>(defaultOrganization);
+const organizationStore = useOrganizationStore();
+const { organizations, selectedOrganizationId } = storeToRefs(organizationStore);
+const selectedOrganization = computed(() =>
+  organizations.value.find((organization) => organization.id === selectedOrganizationId.value),
+);
 
 const navigationItems: NavigationItem[] = [
   { label: 'Dashboard', routeName: 'dashboard', icon: mdiViewDashboardOutline },
@@ -74,6 +50,15 @@ const navigationItems: NavigationItem[] = [
 
 function isActive(routeName: string): boolean {
   return route.name === routeName;
+}
+
+function getOrganizationInitials(organization: Organization): string {
+  return organization.name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word.charAt(0).toUpperCase())
+    .join('');
 }
 </script>
 
@@ -112,32 +97,33 @@ function isActive(routeName: string): boolean {
     <div class="organization-field">
       <label for="organization-selector">Organization</label>
       <Select
-        v-model="selectedOrganization"
+        v-model="selectedOrganizationId"
         input-id="organization-selector"
         :options="organizations"
         option-label="name"
+        option-value="id"
         data-key="id"
         class="organization-select"
         fluid
       >
-        <template #value="{ value }">
+        <template #value>
           <div
-            v-if="value"
+            v-if="selectedOrganization"
             class="organization-option"
           >
-            <span class="organization-option__initials">{{ value.initials }}</span>
+            <span class="organization-option__initials">{{
+              getOrganizationInitials(selectedOrganization)
+            }}</span>
             <span class="organization-option__copy">
-              <strong>{{ value.name }}</strong>
-              <span>{{ value.siteCount }} sites</span>
+              <strong>{{ selectedOrganization.name }}</strong>
             </span>
           </div>
         </template>
         <template #option="{ option }">
           <div class="organization-option">
-            <span class="organization-option__initials">{{ option.initials }}</span>
+            <span class="organization-option__initials">{{ getOrganizationInitials(option) }}</span>
             <span class="organization-option__copy">
               <strong>{{ option.name }}</strong>
-              <span>{{ option.siteCount }} sites</span>
             </span>
           </div>
         </template>

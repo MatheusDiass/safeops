@@ -6,6 +6,16 @@ type ApiErrorBody = {
 };
 
 const apiUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+const unauthenticatedEndpoints = new Set([
+  '/identity/auth/web/login',
+  '/identity/auth/web/refresh',
+  '/identity/users',
+]);
+let getAccessToken: (() => string | undefined) | undefined;
+
+export function configureAccessTokenProvider(provider: () => string | undefined): void {
+  getAccessToken = provider;
+}
 
 export const http = axios.create({
   baseURL: apiUrl,
@@ -13,6 +23,16 @@ export const http = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+});
+
+http.interceptors.request.use((config) => {
+  const accessToken = getAccessToken?.();
+
+  if (accessToken && !unauthenticatedEndpoints.has(config.url ?? '')) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
+  }
+
+  return config;
 });
 
 http.interceptors.response.use(

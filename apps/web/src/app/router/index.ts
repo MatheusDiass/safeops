@@ -10,6 +10,7 @@ export const router = createRouter({
     {
       path: '/',
       component: AppLayout,
+      meta: { requiresAuth: true },
       children: [
         { path: '', redirect: { name: 'dashboard' } },
         {
@@ -59,7 +60,7 @@ export const router = createRouter({
         },
       ],
     },
-    { path: '/login', component: LoginPage },
-    { path: '/register', component: RegisterPage },
+    { path: '/login', name: 'login', component: LoginPage, meta: { guestOnly: true } },
+    { path: '/register', name: 'register', component: RegisterPage, meta: { guestOnly: true } },
   ],
 });

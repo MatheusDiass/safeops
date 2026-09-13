@@ -1,18 +1,38 @@
 import { ref } from 'vue';
-import { getAuthenticatedUser, login } from '../api/auth.api';
-import type { AuthenticatedUser } from '../types/auth.types';
+import { useRouter } from 'vue-router';
+import { login } from '../api/auth.api';
+import { useAuthStore } from '../stores/auth.store';
+import { useOrganizationStore } from '../../organization/stores/organization.store';
 
 export function useLogin() {
+  const router = useRouter();
+  const authStore = useAuthStore();
+  const organizationStore = useOrganizationStore();
   const isSubmitting = ref(false);
   const errorMessage = ref<string>();
-  const authenticatedUser = ref<AuthenticatedUser>();
 
   async function submit(email: string, password: string): Promise<void> {
     isSubmitting.value = true;
     errorMessage.value = undefined;
     try {
       const session = await login({ email, password });
-      authenticatedUser.value = await getAuthenticatedUser(session.accessToken);
+      authStore.setSession(session);
+      organizationStore.clear();
+
+      try {
+        await authStore.loadAuthenticatedUser();
+      } catch (error: unknown) {
+        authStore.clear();
+        throw error;
+      }
+
+      try {
+        await organizationStore.loadOrganizations();
+      } catch {
+        // Organization loading failure does not invalidate the authenticated session.
+      }
+
+      await router.push({ name: 'dashboard' });
     } catch (error: unknown) {
       errorMessage.value =
         error instanceof Error ? error.message : 'Unable to sign in. Please try again.';
@@ -20,5 +40,5 @@ export function useLogin() {
       isSubmitting.value = false;
     }
   }
-  return { authenticatedUser, errorMessage, isSubmitting, submit };
+  return { errorMessage, isSubmitting, submit };
 }

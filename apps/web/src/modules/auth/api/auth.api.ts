@@ -12,14 +12,18 @@ export async function login(credentials: LoginRequest): Promise<LoginResponse> {
   return response.data;
 }
 
+export async function refreshSession(): Promise<LoginResponse> {
+  const response = await http.post<LoginResponse>('/identity/auth/web/refresh');
+
+  return response.data;
+}
+
 export async function registerUser(request: RegisterUserRequest): Promise<void> {
   await http.post('/identity/users', request);
 }
 
-export async function getAuthenticatedUser(accessToken: string): Promise<AuthenticatedUser> {
-  const response = await http.get<AuthenticatedUser>('/identity/me', {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
+export async function getAuthenticatedUser(): Promise<AuthenticatedUser> {
+  const response = await http.get<AuthenticatedUser>('/identity/me');
 
   return response.data;
 }

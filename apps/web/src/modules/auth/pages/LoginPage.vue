@@ -9,7 +9,7 @@ import { useLogin } from '../composables/useLogin';
 
 const email = ref('');
 const password = ref('');
-const { authenticatedUser, errorMessage, isSubmitting, submit } = useLogin();
+const { errorMessage, isSubmitting, submit } = useLogin();
 
 function handleSubmit(): void {
   void submit(email.value, password.value);
@@ -67,13 +67,6 @@ function handleSubmit(): void {
         {{ errorMessage }}
       </Message>
 
-      <Message
-        v-if="authenticatedUser"
-        severity="success"
-      >
-        Signed in as {{ authenticatedUser.name }}.
-      </Message>
-
       <Button
         type="submit"
         label="Sign in"
@@ -82,6 +75,8 @@ function handleSubmit(): void {
         fluid
       />
     </form>
-    <template #footer>Don't have an account? <RouterLink to="/register">Create one</RouterLink></template>
+    <template #footer
+      >Don't have an account? <RouterLink to="/register">Create one</RouterLink></template
+    >
   </AuthLayout>
 </template>
