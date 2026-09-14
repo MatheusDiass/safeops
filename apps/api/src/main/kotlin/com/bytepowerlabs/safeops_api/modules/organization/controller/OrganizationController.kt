@@ -31,8 +31,14 @@ class OrganizationController(
 ) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun createOrganization(@Valid @RequestBody request: CreateOrganizationRequest, @AuthenticationPrincipal jwt: Jwt) {
-        createOrganizationService.execute(request = request, userAccountId = UUID.fromString(jwt.subject))
+    fun createOrganization(
+        @Valid @RequestBody request: CreateOrganizationRequest,
+        @AuthenticationPrincipal jwt: Jwt
+    ): OrganizationResponse {
+        return createOrganizationService.execute(
+            request = request,
+            userAccountId = UUID.fromString(jwt.subject)
+        )
     }
 
     @GetMapping("/{organizationId}")

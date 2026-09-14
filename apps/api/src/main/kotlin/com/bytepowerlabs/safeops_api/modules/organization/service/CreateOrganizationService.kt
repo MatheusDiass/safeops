@@ -3,6 +3,7 @@ package com.bytepowerlabs.safeops_api.modules.organization.service
 import com.bytepowerlabs.safeops_api.modules.identity.exception.UserAccountNotFoundException
 import com.bytepowerlabs.safeops_api.modules.identity.repository.UserRepository
 import com.bytepowerlabs.safeops_api.modules.organization.dto.CreateOrganizationRequest
+import com.bytepowerlabs.safeops_api.modules.organization.dto.OrganizationResponse
 import com.bytepowerlabs.safeops_api.modules.organization.entity.OrganizationEntity
 import com.bytepowerlabs.safeops_api.modules.organization.entity.OrganizationMembershipEntity
 import com.bytepowerlabs.safeops_api.modules.organization.entity.OrganizationRole
@@ -20,12 +21,12 @@ class CreateOrganizationService(
     private val userAccountRepository: UserRepository
 ) {
     @Transactional
-    fun execute(request: CreateOrganizationRequest, userAccountId: UUID) {
+    fun execute(request: CreateOrganizationRequest, userAccountId: UUID): OrganizationResponse {
         val userAccount = userAccountRepository.findByIdOrNull(userAccountId) ?: throw UserAccountNotFoundException()
 
         val organization = OrganizationEntity(name = request.name)
 
-        organizationRepository.save(organization)
+        val savedOrganization = organizationRepository.save(organization)
 
         val organizationMembershipEntity =
             OrganizationMembershipEntity(
@@ -35,5 +36,14 @@ class CreateOrganizationService(
             )
 
         organizationMembershipRepository.save(organizationMembershipEntity)
+
+        return OrganizationResponse(
+            id = savedOrganization.id,
+            name = savedOrganization.name,
+            status = savedOrganization.status,
+            siteCount = 0,
+            createdAt = savedOrganization.createdAt,
+            updatedAt = savedOrganization.updatedAt,
+        )
     }
 }
