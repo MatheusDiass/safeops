@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import AppLayout from '../../layouts/AppLayout.vue';
 import LoginPage from '../../modules/auth/pages/LoginPage.vue';
 import RegisterPage from '../../modules/auth/pages/RegisterPage.vue';
+import CreateOrganizationPage from '../../modules/organization/pages/CreateOrganizationPage.vue';
 import OrganizationsPage from '../../modules/organization/pages/OrganizationsPage.vue';
 import WorkspacePage from '../../modules/workspace/pages/WorkspacePage.vue';
 
@@ -30,6 +31,15 @@ export const router = createRouter({
           meta: {
             title: 'Organizations',
             description: 'Manage the organizations available to your account.',
+          },
+        },
+        {
+          path: 'organization/new',
+          name: 'create-organization',
+          component: CreateOrganizationPage,
+          meta: {
+            title: 'Create organization',
+            description: 'Create a new organization for your safety operations.',
           },
         },
         {

@@ -1,7 +1,10 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { listOrganizations } from '../api/organization.api';
-import type { Organization } from '../types/organization.types';
+import {
+  createOrganization as createOrganizationRequest,
+  listOrganizations,
+} from '../api/organization.api';
+import type { CreateOrganizationRequest, Organization } from '../types/organization.types';
 
 export const useOrganizationStore = defineStore('organization', () => {
   const organizations = ref<Organization[]>([]);
@@ -34,11 +37,24 @@ export const useOrganizationStore = defineStore('organization', () => {
     }
   }
 
+  async function createOrganization(request: CreateOrganizationRequest): Promise<void> {
+    const organization = await createOrganizationRequest(request);
+
+    organizations.value.push(organization);
+    selectedOrganizationId.value = organization.id;
+  }
+
   function clear(): void {
     organizations.value = [];
     selectedOrganizationId.value = null;
     hasLoadedOrganizations = false;
   }
 
-  return { organizations, selectedOrganizationId, clear, loadOrganizations };
+  return {
+    organizations,
+    selectedOrganizationId,
+    clear,
+    createOrganization,
+    loadOrganizations,
+  };
 });

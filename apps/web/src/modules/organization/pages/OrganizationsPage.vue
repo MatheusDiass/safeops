@@ -4,10 +4,12 @@ import { storeToRefs } from 'pinia';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import OrganizationCard from '../components/OrganizationCard.vue';
 import { useOrganizationStore } from '../stores/organization.store';
 
 const organizationStore = useOrganizationStore();
+const router = useRouter();
 const { organizations } = storeToRefs(organizationStore);
 const searchQuery = ref('');
 
@@ -27,6 +29,10 @@ const filteredOrganizations = computed(() => {
     organization.name.toLocaleLowerCase().includes(query),
   );
 });
+
+function openCreateOrganization(): void {
+  void router.push({ name: 'create-organization' });
+}
 </script>
 
 <template>
@@ -41,6 +47,7 @@ const filteredOrganizations = computed(() => {
       <Button
         v-if="hasOrganizations"
         type="button"
+        @click="openCreateOrganization"
       >
         <svg
           class="button-icon"
@@ -109,7 +116,10 @@ const filteredOrganizations = computed(() => {
         <h2>Create your first organization</h2>
         <p>Organizations bring your sites and safety operations together in one workspace.</p>
       </div>
-      <Button type="button">
+      <Button
+        type="button"
+        @click="openCreateOrganization"
+      >
         <svg
           class="button-icon"
           viewBox="0 0 24 24"
