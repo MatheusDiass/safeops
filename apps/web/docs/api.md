@@ -42,16 +42,142 @@ src/shared/api/http.ts
 
 ---
 
-## Feature API Modules
+## Feature API Objects
 
-A feature API module may expose:
+Group a feature's HTTP operations in a single `<feature>Api` object.
+
+The API object is responsible only for HTTP communication. Business rules, application state, routing, notifications, and UI behavior should remain in higher layers such as Pinia stores, composables, or pages.
+
+Use concise method names because the feature is already identified by the API object.
+
+For standard CRUD operations, prefer:
+
+- `list`
+- `get`
+- `create`
+- `update`
+- `remove`
+
+For operations that are not standard CRUD operations, use domain-specific names such as:
+
+- `changeStatus`
+- `close`
+- `reopen`
+- `inviteMember`
+
+Example:
 
 ```ts
-listIncidents();
-getIncident();
-createIncident();
-updateIncident();
-changeIncidentStatus();
+import { http } from '../../../shared/api/http';
+import type {
+  CreateOrganizationRequest,
+  Organization,
+  UpdateOrganizationRequest,
+} from '../types/organization.types';
+
+export const organizationApi = {
+  async list(): Promise<Organization[]> {
+    const response = await http.get<Organization[]>('/organizations');
+
+    return response.data;
+  },
+
+  async get(organizationId: string): Promise<Organization> {
+    const response = await http.get<Organization>(`/organizations/${organizationId}`);
+
+    return response.data;
+  },
+
+  async create(request: CreateOrganizationRequest): Promise<Organization> {
+    const response = await http.post<Organization>('/organizations', request);
+
+    return response.data;
+  },
+
+  async update(organizationId: string, request: UpdateOrganizationRequest): Promise<Organization> {
+    const response = await http.patch<Organization>(`/organizations/${organizationId}`, request);
+
+    return response.data;
+  },
+};
+```
+
+Consumers should call HTTP operations through the feature API object:
+
+```ts
+await organizationApi.list();
+await organizationApi.get(organizationId);
+await organizationApi.create(request);
+await organizationApi.update(organizationId, request);
+```
+
+Higher layers may keep domain-specific action names while delegating HTTP communication to the API object.
+
+Example in a Pinia store:
+
+```ts
+async function createOrganization(request: CreateOrganizationRequest): Promise<void> {
+  const organization = await organizationApi.create(request);
+
+  upsertOrganization(organization);
+  selectedOrganizationId.value = organization.id;
+}
+
+async function updateOrganization(
+  organizationId: string,
+  request: UpdateOrganizationRequest,
+): Promise<void> {
+  const organization = await organizationApi.update(organizationId, request);
+
+  upsertOrganization(organization);
+}
+```
+
+Responsibilities should remain clear:
+
+```text
+organizationApi.create()
+→ HTTP communication
+
+organizationStore.createOrganization()
+→ application state and behavior
+
+page / composable
+→ UI behavior and user interaction
+```
+
+Do not export standalone feature-prefixed HTTP functions such as:
+
+```ts
+createOrganization();
+updateOrganization();
+getOrganization();
+```
+
+when they would conflict with store actions or other higher-level functions.
+
+Avoid import aliases such as:
+
+```ts
+import { createOrganization as createOrganizationRequest } from './organization.api';
+```
+
+Prefer:
+
+```ts
+import { organizationApi } from './organization.api';
+
+await organizationApi.create(request);
+```
+
+Do not place application state, Pinia logic, routing, notifications, or business rules inside API objects.
+
+The API object's responsibility should remain limited to:
+
+```text
+build the HTTP request
+→ send the request
+→ return the typed response
 ```
 
 Grouping endpoint operations in one feature API file is acceptable while the file remains cohesive.

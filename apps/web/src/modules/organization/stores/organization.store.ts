@@ -1,11 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import {
-  createOrganization as createOrganizationRequest,
-  getOrganization as getOrganizationRequest,
-  listOrganizations,
-  updateOrganization as updateOrganizationRequest,
-} from '../api/organization.api';
+import { organizationApi } from '../api/organization.api';
 import type {
   CreateOrganizationRequest,
   Organization,
@@ -23,7 +18,7 @@ export const useOrganizationStore = defineStore('organization', () => {
       return organizations.value;
     }
 
-    organizationsRequest ??= listOrganizations();
+    organizationsRequest ??= organizationApi.list();
 
     try {
       const availableOrganizations = await organizationsRequest;
@@ -44,7 +39,7 @@ export const useOrganizationStore = defineStore('organization', () => {
   }
 
   async function createOrganization(request: CreateOrganizationRequest): Promise<void> {
-    const organization = await createOrganizationRequest(request);
+    const organization = await organizationApi.create(request);
 
     upsertOrganization(organization);
     selectedOrganizationId.value = organization.id;
@@ -62,7 +57,7 @@ export const useOrganizationStore = defineStore('organization', () => {
   }
 
   async function loadOrganization(organizationId: string): Promise<Organization> {
-    const organization = await getOrganizationRequest(organizationId);
+    const organization = await organizationApi.get(organizationId);
     upsertOrganization(organization);
 
     return organization;
@@ -72,7 +67,7 @@ export const useOrganizationStore = defineStore('organization', () => {
     organizationId: string,
     request: UpdateOrganizationRequest,
   ): Promise<void> {
-    const organization = await updateOrganizationRequest(organizationId, request);
+    const organization = await organizationApi.update(organizationId, request);
     upsertOrganization(organization);
   }
 

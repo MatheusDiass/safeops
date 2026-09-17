@@ -5,31 +5,31 @@ import type {
   UpdateOrganizationRequest,
 } from '../types/organization.types';
 
-export async function createOrganization(
-  request: CreateOrganizationRequest,
-): Promise<Organization> {
-  const response = await http.post<Organization>('/organizations', request);
+export const organizationApi = {
+  async create(request: CreateOrganizationRequest): Promise<Organization> {
+    const response = await http.post<Organization>('/organizations', request);
 
-  return response.data;
-}
+    return response.data;
+  },
 
-export async function listOrganizations(): Promise<Organization[]> {
-  const response = await http.get<Organization[]>('/organizations');
+  async list(): Promise<Organization[]> {
+    const response = await http.get<Organization[]>('/organizations');
 
-  return response.data;
-}
+    return response.data;
+  },
 
-export async function getOrganization(organizationId: string): Promise<Organization> {
-  const response = await http.get<Organization>(`/organizations/${organizationId}`);
+  async get(organizationId: string): Promise<Organization> {
+    const response = await http.get<Organization>(`/organizations/${organizationId}`);
 
-  return response.data;
-}
+    return response.data;
+  },
 
-export async function updateOrganization(
-  organizationId: string,
-  request: UpdateOrganizationRequest,
-): Promise<Organization> {
-  const response = await http.patch<Organization>(`/organizations/${organizationId}`, request);
+  async update(
+    organizationId: string,
+    request: UpdateOrganizationRequest,
+  ): Promise<Organization> {
+    const response = await http.patch<Organization>(`/organizations/${organizationId}`, request);
 
-  return response.data;
-}
+    return response.data;
+  },
+};
