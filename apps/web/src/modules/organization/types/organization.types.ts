@@ -4,6 +4,11 @@ export type CreateOrganizationRequest = {
   name: string;
 };
 
+export type UpdateOrganizationRequest = {
+  name?: string;
+  status?: OrganizationStatus;
+};
+
 export type Organization = {
   id: string;
   name: string;

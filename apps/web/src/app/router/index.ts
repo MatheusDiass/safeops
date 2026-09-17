@@ -3,6 +3,7 @@ import AppLayout from '../../layouts/AppLayout.vue';
 import LoginPage from '../../modules/auth/pages/LoginPage.vue';
 import RegisterPage from '../../modules/auth/pages/RegisterPage.vue';
 import CreateOrganizationPage from '../../modules/organization/pages/CreateOrganizationPage.vue';
+import EditOrganizationPage from '../../modules/organization/pages/EditOrganizationPage.vue';
 import OrganizationsPage from '../../modules/organization/pages/OrganizationsPage.vue';
 import WorkspacePage from '../../modules/workspace/pages/WorkspacePage.vue';
 
@@ -40,6 +41,15 @@ export const router = createRouter({
           meta: {
             title: 'Create organization',
             description: 'Create a new organization for your safety operations.',
+          },
+        },
+        {
+          path: 'organization/:organizationId/edit',
+          name: 'edit-organization',
+          component: EditOrganizationPage,
+          meta: {
+            title: 'Edit organization',
+            description: 'Update your organization details and status.',
           },
         },
         {

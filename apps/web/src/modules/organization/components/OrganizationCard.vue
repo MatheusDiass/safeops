@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { mdiMapMarkerMultipleOutline } from '@mdi/js';
+import { mdiMapMarkerMultipleOutline, mdiPencilOutline } from '@mdi/js';
+import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 import type { Organization, OrganizationStatus } from '../types/organization.types';
 
@@ -8,6 +9,10 @@ type Props = {
 };
 
 defineProps<Props>();
+
+const emit = defineEmits<{
+  edit: [];
+}>();
 
 function getInitials(name: string): string {
   return name
@@ -49,14 +54,35 @@ function getSiteCountLabel(siteCount: number): string {
       />
     </div>
 
-    <div class="organization-card__sites">
-      <svg
-        viewBox="0 0 24 24"
-        aria-hidden="true"
+    <div class="organization-card__footer">
+      <div class="organization-card__sites">
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path :d="mdiMapMarkerMultipleOutline" />
+        </svg>
+        <span>{{ getSiteCountLabel(organization.siteCount) }}</span>
+      </div>
+      <Button
+        type="button"
+        label="Edit"
+        severity="secondary"
+        text
+        size="small"
+        :aria-label="`Edit ${organization.name}`"
+        @click="emit('edit')"
       >
-        <path :d="mdiMapMarkerMultipleOutline" />
-      </svg>
-      <span>{{ getSiteCountLabel(organization.siteCount) }}</span>
+        <template #icon>
+          <svg
+            class="organization-card__edit-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path :d="mdiPencilOutline" />
+          </svg>
+        </template>
+      </Button>
     </div>
   </article>
 </template>
@@ -108,12 +134,19 @@ function getSiteCountLabel(siteCount: number): string {
   line-height: 1.35;
 }
 
+.organization-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--p-content-border-color);
+}
+
 .organization-card__sites {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--p-content-border-color);
   color: var(--p-text-muted-color);
   font-size: 0.875rem;
 }
@@ -122,6 +155,12 @@ function getSiteCountLabel(siteCount: number): string {
   width: 1.125rem;
   height: 1.125rem;
   flex: 0 0 auto;
+  fill: currentcolor;
+}
+
+.organization-card__edit-icon {
+  width: 1rem;
+  height: 1rem;
   fill: currentcolor;
 }
 </style>

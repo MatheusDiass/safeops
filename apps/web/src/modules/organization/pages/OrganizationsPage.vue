@@ -33,6 +33,10 @@ const filteredOrganizations = computed(() => {
 function openCreateOrganization(): void {
   void router.push({ name: 'create-organization' });
 }
+
+function openEditOrganization(organizationId: string): void {
+  void router.push({ name: 'edit-organization', params: { organizationId } });
+}
 </script>
 
 <template>
@@ -88,6 +92,7 @@ function openCreateOrganization(): void {
         v-for="organization in filteredOrganizations"
         :key="organization.id"
         :organization="organization"
+        @edit="openEditOrganization(organization.id)"
       />
     </section>
 
