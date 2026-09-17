@@ -58,13 +58,12 @@ class OrganizationController(
     }
 
     @PatchMapping("/{organizationId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     fun updateOrganization(
         @PathVariable organizationId: UUID,
         @Valid @RequestBody request: UpdateOrganizationRequest,
         @AuthenticationPrincipal jwt: Jwt
-    ) {
-        updateOrganizationService.execute(
+    ): OrganizationResponse {
+        return updateOrganizationService.execute(
             organizationId = organizationId,
             userAccountId = UUID.fromString(jwt.subject),
             request = request
