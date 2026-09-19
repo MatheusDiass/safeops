@@ -4,11 +4,11 @@
 
 SafeOps Web is the frontend application for the SafeOps safety management platform.
 
-This repository follows a feature-oriented Vue 3 architecture with strong conventions for pages, components, composables, API access, and TypeScript.
+This repository follows a feature-oriented Vue 3 architecture with strong conventions for pages, components, composables, API access, forms, validation, and TypeScript.
 
 This file defines repository-wide instructions for coding agents.
 
-Detailed implementation rules live under `docs/`.
+Detailed architectural and implementation rules live in the project documentation.
 
 ---
 
@@ -27,8 +27,10 @@ Use the existing project stack:
 - Axios
 - SCSS
 - npm
+- `@primevue/forms`
+- Zod
 
-Do not introduce another frontend framework, router, state-management library, HTTP library, form library, validation library, or major dependency unless explicitly requested or clearly justified.
+Do not introduce another frontend framework, router, state-management library, HTTP library, form library, validation library, UI library, or major dependency unless explicitly requested or supported by an intentional architectural decision.
 
 Prefer existing project dependencies and native Vue/browser capabilities.
 
@@ -36,7 +38,11 @@ Prefer existing project dependencies and native Vue/browser capabilities.
 
 ## Source of Truth
 
-Before modifying code, inspect the relevant existing implementation and read the documentation related to the task.
+Before modifying code:
+
+1. inspect the relevant existing implementation;
+2. read the documentation related to the task;
+3. search for an existing implementation that already serves the same role.
 
 Architecture:
 
@@ -64,30 +70,32 @@ If a mature existing implementation is identified by the documentation as a refe
 
 Prefer:
 
-- simple solutions
-- explicit code
-- feature locality
-- small cohesive abstractions
-- established project patterns
-- strong TypeScript typing
-- composition over large components
-- incremental changes
+- simple solutions;
+- explicit code;
+- feature locality;
+- small cohesive abstractions;
+- established project patterns;
+- strong TypeScript typing;
+- composition over large components;
+- incremental changes.
 
 Avoid:
 
-- speculative abstractions
-- premature generalization
-- unnecessary wrappers
-- unnecessary dependencies
-- unrelated refactors
-- duplicated business behavior
-- giant components
-- giant composables
-- global state for local concerns
+- speculative abstractions;
+- premature generalization;
+- unnecessary wrappers;
+- unnecessary dependencies;
+- unrelated refactors;
+- duplicated behavior;
+- giant components;
+- giant composables;
+- global state for local concerns.
 
 Do not create abstractions only because they might be useful in the future.
 
 Create them when they solve an existing reuse, complexity, or maintainability problem.
+
+Consistency with established SafeOps patterns is preferred over introducing another technically valid approach.
 
 ---
 
@@ -95,27 +103,54 @@ Create them when they solve an existing reuse, complexity, or maintainability pr
 
 Feature-specific code belongs under:
 
-`src/modules/<feature>/`
+```text
+src/modules/<feature>/
+```
+
+A feature may contain only the directories it actually needs, such as:
+
+```text
+<feature>/
+├── api/
+├── components/
+├── composables/
+├── pages/
+├── schemas/
+├── stores/
+└── types/
+```
+
+Do not create empty directories merely to keep modules visually symmetrical.
 
 Reusable SafeOps application-level components belong under:
 
-`src/components/`
+```text
+src/components/
+```
 
 Cross-feature reusable logic belongs under:
 
-`src/shared/`
+```text
+src/shared/
+```
 
 Application infrastructure belongs under:
 
-`src/app/`
+```text
+src/app/
+```
 
 Layouts belong under:
 
-`src/layouts/`
+```text
+src/layouts/
+```
 
 Keep feature-specific code inside its feature unless genuine cross-feature reuse exists.
 
 Do not move code into `shared` only because it could theoretically be reused.
+
+Prefer local-first implementation and extract only after actual reuse or complexity justifies it.
 
 ---
 
@@ -125,7 +160,9 @@ Use Composition API.
 
 Use:
 
-`<script setup lang="ts">`
+```vue
+<script setup lang="ts">
+```
 
 Do not use Options API unless required by an existing integration.
 
@@ -141,28 +178,109 @@ Composable names begin with `use`.
 
 Do not create a composable merely to reduce the number of lines in a Vue component.
 
+Pages should coordinate screen-level behavior.
+
+Components should remain focused on UI responsibilities.
+
+Composables should encapsulate cohesive reactive behavior, not act as generic service containers.
+
 ---
 
 ## UI Components and Styling
 
 PrimeVue 4 in Styled Mode is the official SafeOps UI component library.
 
-Before implementing a generic control, search PrimeVue for an existing component. Use PrimeVue directly for generic controls such as buttons, inputs, selects, dialogs, tables, menus, tabs, toasts, and tags.
+Before implementing a generic control, check whether PrimeVue already provides it.
 
-Do not create wrappers such as `AppButton`, `AppInput`, or `AppSelect` merely to rename PrimeVue components, proxy their APIs, or theoretically isolate the dependency.
+Use PrimeVue directly for generic controls such as:
 
-Create a SafeOps component only when it adds meaningful domain semantics, behavior, composition, reuse, or presentation logic.
+- buttons;
+- inputs;
+- selects;
+- dialogs;
+- tables;
+- menus;
+- tabs;
+- toasts;
+- tags;
+- form controls.
+
+Do not create wrappers such as `AppButton`, `AppInput`, `AppSelect`, or similar components merely to rename PrimeVue components, proxy their APIs, or theoretically isolate the dependency.
+
+Create a SafeOps component only when it adds meaningful:
+
+- domain semantics;
+- application-specific behavior;
+- composition;
+- genuine reuse;
+- presentation logic.
 
 Prefer styling in this order:
 
-1. PrimeVue semantic design tokens
-2. PrimeVue component design tokens
-3. application-level SCSS
-4. component-scoped SCSS
+1. PrimeVue semantic design tokens;
+2. PrimeVue component design tokens;
+3. application-level SCSS;
+4. component-scoped SCSS.
 
-Do not globally override PrimeVue internal CSS classes when design tokens can express the change. Do not introduce another UI component library without an explicit architectural decision.
+Do not globally override PrimeVue internal CSS classes when design tokens can express the change.
 
-Detailed UI and theming rules are documented in `docs/design-system.md`.
+Do not introduce another UI component library without an explicit architectural decision.
+
+Detailed UI, field-state, validation presentation, and theming rules are documented in:
+
+```text
+docs/design-system.md
+```
+
+---
+
+## Forms and Validation
+
+PrimeVue Forms and Zod are the standard form and client-side validation solution for SafeOps.
+
+When creating or modifying forms:
+
+- use `@primevue/forms` for form state, validation lifecycle, and submission;
+- use Zod for client-side validation schemas;
+- integrate Zod through `zodResolver` from `@primevue/forms/resolvers/zod`;
+- keep feature-specific validation schemas under the feature's `schemas/` directory;
+- reuse field schemas between related forms when appropriate;
+- prefer `z.infer<typeof schema>` when it avoids duplicating form value types;
+- register PrimeVue form fields using `name`;
+- let PrimeVue Forms own registered field state;
+- do not create parallel `v-model` / `ref` state for a field without a concrete need;
+- validate on blur and submit by default, not on every value update;
+- prevent invalid forms from calling the API;
+- do not reproduce schema validation manually in submit handlers;
+- do not implement field validation through watchers or one error `ref` per field;
+- keep frontend validation focused on input shape and user experience;
+- keep authorization, permissions, persisted resource state, ownership, and other trusted business rules in the backend;
+- keep Zod field validation errors separate from API `ProblemDetail` and business errors;
+- do not introduce another form or validation library without an explicit architectural decision.
+
+Do not create generic abstractions such as:
+
+- `AppForm`;
+- `AppFormField`;
+- generic form composables;
+
+unless an existing, demonstrated reuse or complexity problem justifies them.
+
+Validation rules must reflect actual product or API requirements.
+
+Do not invent domain constraints merely because they appear reasonable.
+
+Follow the form architecture defined in:
+
+```text
+ARCHITECTURE.md
+```
+
+Follow field-state and validation presentation rules defined in:
+
+```text
+docs/design-system.md
+```
 
 ---
 
@@ -172,25 +290,40 @@ Keep TypeScript strict.
 
 Do not use `any` unless interacting with an unavoidable untyped external API.
 
-When `any` is unavoidable, keep its scope minimal and document why.
+When `any` is unavoidable:
+
+- keep its scope minimal;
+- document why it is required.
 
 Prefer:
 
-- domain-specific types
-- `type` for domain models, DTOs, component props, aliases, unions, and ordinary object shapes
-- explicit public function types
-- `import type`
-- union types where appropriate
-- inferred local types when obvious
+- domain-specific types;
+- `type` for domain models, DTOs, component props, aliases, unions, and ordinary object shapes;
+- explicit public function types where useful;
+- `import type`;
+- union types where appropriate;
+- inferred local types when obvious.
 
 Avoid:
 
-- unnecessary type assertions
-- unnecessary non-null assertions
-- duplicated types representing the same API model
-- broad generic types when a domain type exists
+- unnecessary type assertions;
+- unnecessary non-null assertions;
+- duplicated types representing the same model;
+- broad generic types when a domain type exists.
 
 Use `interface` only when declaration merging or an intentionally interface-specific extension pattern is required.
+
+When runtime values and TypeScript types represent the same finite set, prefer deriving the type from the runtime source when appropriate.
+
+Example:
+
+```ts
+export const ORGANIZATION_STATUSES = ['ACTIVE', 'DISABLED'] as const;
+
+export type OrganizationStatus = (typeof ORGANIZATION_STATUSES)[number];
+```
+
+Avoid maintaining duplicated enum-like values and union types separately when one can safely derive from the other.
 
 ---
 
@@ -200,32 +333,44 @@ Vue components must not call the raw HTTP client directly.
 
 HTTP communication belongs in:
 
-`src/modules/<feature>/api/`
+```text
+src/modules/<feature>/api/
+```
 
 or, for cross-feature infrastructure:
 
-`src/shared/api/`
+```text
+src/shared/api/
+```
 
-API modules may know:
+Feature API modules may know:
 
-- endpoint URLs
-- request DTOs
-- response DTOs
-- HTTP methods
+- endpoint URLs;
+- request DTOs;
+- response DTOs;
+- HTTP methods.
 
-API modules must not know:
+Feature API modules must not know:
 
-- Vue Router
-- component state
-- modal state
-- notifications
-- Vue `ref`, `computed`, or `watch`
+- Vue Router;
+- component state;
+- modal state;
+- notifications;
+- Vue `ref`, `computed`, or `watch`.
+
+Group a feature's related HTTP operations according to the existing API conventions documented in:
+
+```text
+docs/api.md
+```
+
+Do not change endpoint semantics from the frontend unless the task explicitly requires an API contract change.
 
 ---
 
 ## State Management
 
-Use component-local state when the state belongs to one component.
+Use component-local state when state belongs to one component or screen.
 
 Use composables for cohesive reactive behavior.
 
@@ -235,32 +380,36 @@ Do not put ordinary local state in Pinia.
 
 Examples that normally remain local:
 
-- modal visibility
-- password visibility
-- form fields
-- page loading state
-- page-local filters
-- selected tab
+- modal visibility;
+- password visibility;
+- form fields;
+- page loading state;
+- page-local filters;
+- selected tab.
+
+Do not store PrimeVue Forms field state in Pinia.
 
 ---
 
 ## Security
 
-The backend is authoritative for authorization.
+The backend is authoritative for authorization and security-sensitive validation.
 
-Frontend permission checks are only for user experience.
+Frontend permission checks exist only to improve user experience.
 
-Never weaken backend security assumptions because an action is hidden in the frontend.
+Never weaken backend security assumptions because an action is hidden or disabled in the frontend.
 
 Never:
 
-- expose secrets in frontend code
-- commit credentials
-- log passwords
-- log authentication tokens
-- store refresh tokens in JavaScript-accessible storage
+- expose secrets in frontend code;
+- commit credentials;
+- log passwords;
+- log access or refresh tokens;
+- store refresh tokens in JavaScript-accessible storage.
 
 Authentication behavior must follow the existing SafeOps backend contract.
+
+Frontend validation must never be treated as a security boundary.
 
 ---
 
@@ -272,18 +421,21 @@ Do not perform unrelated refactors.
 
 Before creating a new:
 
-- component
-- composable
-- utility
-- store
-- API abstraction
-- shared type
+- component;
+- composable;
+- utility;
+- store;
+- API abstraction;
+- validation schema abstraction;
+- shared type;
 
 search the repository for an existing equivalent or established pattern.
 
 Before creating a generic interactive or visual component, also check whether PrimeVue already provides it.
 
-Prefer extending an existing convention over introducing a new competing pattern.
+Prefer extending an existing convention over introducing a competing pattern.
+
+Do not rename, move, or reorganize unrelated files while implementing a focused task.
 
 ---
 
@@ -291,29 +443,32 @@ Prefer extending an existing convention over introducing a new competing pattern
 
 Before adding a dependency:
 
-1. Check whether the current stack already solves the problem.
-2. Check whether the browser or Vue provides the required functionality.
-3. Confirm the dependency has a clear architectural benefit.
-4. Prefer actively maintained packages.
-5. Avoid adding a package for trivial functionality.
+1. check whether the current stack already solves the problem;
+2. check whether the browser or Vue provides the required functionality;
+3. confirm the dependency has a clear architectural benefit;
+4. prefer actively maintained packages;
+5. avoid adding a package for trivial functionality.
 
-Another UI component library requires an explicit architectural decision.
+Another UI component library, form library, validation library, HTTP library, or state-management library requires an explicit architectural decision.
 
-Do not add a new dependency silently when implementing an unrelated task.
+Do not add a dependency silently when implementing an unrelated task.
+
+If a dependency is required by the requested architectural pattern, verify whether it is already installed before adding it.
 
 ---
 
 ## Agent Workflow
 
-Before implementing:
+### Before implementing
 
 1. Understand the requested behavior.
 2. Inspect the relevant module.
 3. Read the relevant convention documents.
 4. Search for an existing implementation serving the same role.
-5. Determine the smallest coherent change.
+5. Identify API and domain constraints relevant to the task.
+6. Determine the smallest coherent change.
 
-While implementing:
+### While implementing
 
 1. Follow existing project conventions.
 2. Keep feature code local to its module.
@@ -321,15 +476,18 @@ While implementing:
 4. Keep components focused on UI.
 5. Keep HTTP details in API modules.
 6. Keep reusable reactive behavior in composables.
-7. Avoid speculative abstractions.
+7. Keep validation schemas inside the owning feature.
+8. Avoid speculative abstractions.
+9. Avoid changing behavior outside the task scope.
 
-After implementing:
+### After implementing
 
 1. Review the complete diff.
 2. Remove accidental or unrelated modifications.
-3. Run the relevant validation commands.
+3. Run the relevant project validation commands.
 4. Fix failures introduced by the change.
-5. Summarize what changed.
+5. Verify the affected user flow when practical.
+6. Summarize what changed and any relevant constraints.
 
 ---
 
@@ -337,24 +495,51 @@ After implementing:
 
 Use the project scripts defined in `package.json`.
 
-Expected checks include:
+Typical checks include:
 
 ```bash
-npm lint
-npm type-check
+npm run lint
+npm run type-check
 ```
 
 When the change can affect the production bundle, also run:
 
 ```bash
-npm build
+npm run build
 ```
+
+Run relevant tests when the project provides them.
 
 Do not claim a command passed unless it was actually executed.
 
-If a command cannot be executed, clearly state why.
+If a command does not exist, cannot be executed, or fails because of an unrelated pre-existing issue, state that clearly.
 
 Do not silently fix unrelated pre-existing failures.
+
+---
+
+## Documentation Changes
+
+Update documentation when a task intentionally changes an established:
+
+- module structure;
+- dependency direction;
+- global state strategy;
+- router strategy;
+- HTTP strategy;
+- form strategy;
+- validation strategy;
+- UI component strategy;
+- testing strategy.
+
+Do not duplicate implementation details across multiple documentation files.
+
+Use:
+
+- `ARCHITECTURE.md` for architecture and responsibility boundaries;
+- `docs/design-system.md` for visual and interaction standards;
+- focused files under `docs/` for implementation conventions;
+- this `AGENTS.md` for concise agent instructions.
 
 ---
 
@@ -362,15 +547,16 @@ Do not silently fix unrelated pre-existing failures.
 
 A task is complete when:
 
-- the requested behavior is implemented
-- the architecture is respected
-- relevant loading states are handled
-- relevant error states are handled
-- TypeScript types are correct
-- unnecessary duplication was not introduced
-- relevant tests were created or updated when appropriate
-- lint and type checking pass for the changed code
-- no unrelated files were modified
+- the requested behavior is implemented;
+- the documented architecture is respected;
+- relevant loading states are handled;
+- relevant error states are handled;
+- TypeScript types are correct;
+- unnecessary duplication was not introduced;
+- relevant tests were created or updated when appropriate;
+- relevant lint and type-check commands pass for the changed code;
+- no unrelated files were modified;
+- documentation was updated if the task intentionally changed an established architectural convention.
 
 ---
 

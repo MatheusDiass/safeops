@@ -22,7 +22,7 @@ Frontend structure follows UI and feature responsibilities.
 
 ---
 
-# Source Structure
+## Source Structure
 
 ```text
 src/
@@ -38,11 +38,11 @@ src/
 
 ---
 
-# `app/`
+## `app/`
 
 Contains application-level infrastructure.
 
-Examples:
+Example:
 
 ```text
 app/
@@ -66,7 +66,7 @@ Feature behavior must not be implemented here.
 
 ---
 
-# `modules/`
+## `modules/`
 
 Contains domain-oriented application features.
 
@@ -88,6 +88,7 @@ A feature may contain:
 ├── components/
 ├── composables/
 ├── pages/
+├── schemas/
 └── types/
 ```
 
@@ -103,11 +104,11 @@ Example:
 modules/incident/components/IncidentStatusBadge.vue
 ```
 
-should not be placed under `src/components/` because the concept of incident status belongs to the Incidents feature.
+This component should not be placed under `src/components/` because incident status belongs to the Incident feature.
 
 ---
 
-# `components/`
+## `components/`
 
 Contains reusable SafeOps application-level components when genuine cross-feature reuse exists.
 
@@ -125,7 +126,7 @@ Feature-specific components remain inside their modules.
 
 ---
 
-# UI Architecture
+## UI Architecture
 
 PrimeVue 4 in Styled Mode is the official UI foundation.
 
@@ -158,11 +159,11 @@ PrimeVue DataTable
 
 The application-wide custom PrimeVue preset belongs under `src/app/theme/`, for example `src/app/theme/safeops.preset.ts`. It is based on an official PrimeVue preset and customized through design tokens.
 
-Detailed UI and theming rules are documented in `docs/design-system.md`.
+Detailed UI, form presentation, validation presentation, and theming rules are documented in `docs/design-system.md`.
 
 ---
 
-# `layouts/`
+## `layouts/`
 
 Contains reusable page shells.
 
@@ -186,7 +187,7 @@ Layouts should not implement feature-specific business behavior.
 
 ---
 
-# `shared/`
+## `shared/`
 
 Contains code genuinely reused across multiple features.
 
@@ -212,11 +213,11 @@ A feature implementation should not be moved here based only on predicted future
 
 Prefer:
 
-> local first, shared after actual reuse.
+> _local first, shared after actual reuse._
 
 ---
 
-# Dependency Direction
+## Dependency Direction
 
 Preferred UI composition direction:
 
@@ -250,7 +251,7 @@ This is not a strict layered architecture, but dependencies should remain unders
 
 ---
 
-# Pages
+## Pages
 
 Pages represent route-level screens.
 
@@ -273,13 +274,11 @@ Pages primarily coordinate:
 
 Pages should reveal the screen flow clearly when reading their template and script.
 
-Detailed page rules are documented in:
-
-`docs/pages.md`
+Detailed page rules are documented in `docs/pages.md`.
 
 ---
 
-# Components
+## Components
 
 Components primarily represent UI responsibilities.
 
@@ -295,13 +294,11 @@ A component may contain:
 
 Components should not become containers for unrelated application behavior.
 
-Detailed rules are documented in:
-
-`docs/components.md`
+Detailed rules are documented in `docs/components.md`.
 
 ---
 
-# Composables
+## Composables
 
 Composables encapsulate cohesive Vue reactive behavior.
 
@@ -324,13 +321,11 @@ useIncidents()
 
 when they contain every action related to the feature.
 
-Detailed rules are documented in:
-
-`docs/composables.md`
+Detailed rules are documented in `docs/composables.md`.
 
 ---
 
-# API Layer
+## API Layer
 
 HTTP communication is isolated from components.
 
@@ -354,13 +349,234 @@ The API layer represents communication with the SafeOps backend.
 
 It does not manage UI state.
 
-Detailed rules are documented in:
-
-`docs/api.md`
+Detailed rules are documented in `docs/api.md`.
 
 ---
 
-# Pinia
+## Form Validation
+
+SafeOps application forms that require validation and submission use **PrimeVue Forms** with **Zod** for schema-based validation.
+
+The standard validation flow is:
+
+```text
+PrimeVue Components
+        ↓
+@primevue/forms
+        ↓
+zodResolver
+        ↓
+Zod Schema
+        ↓
+Feature API
+        ↓
+SafeOps Backend
+```
+
+### Responsibilities
+
+Each layer has a distinct responsibility:
+
+- **PrimeVue components** render form controls and validation feedback.
+- **`@primevue/forms`** manages form values, field state, validation lifecycle, and submission.
+- **Zod** defines client-side validation rules and transforms when appropriate.
+- **`zodResolver`** adapts Zod validation results to PrimeVue Forms.
+- **Feature APIs** map valid form data to backend requests.
+- **The backend remains authoritative** for business rules, authorization, resource state, persistence constraints, and security-sensitive validation.
+
+### Validation schemas
+
+Validation schemas belong to the feature that owns the form.
+
+Example:
+
+```text
+modules/
+└── organization/
+    ├── api/
+    ├── pages/
+    ├── schemas/
+    │   └── organization.schema.ts
+    └── types/
+```
+
+Create the `schemas/` directory only when the feature actually contains validation schemas.
+
+Schemas should reuse shared field rules when Create and Update forms validate the same fields.
+
+Example:
+
+```ts
+const organizationNameSchema = z
+  .string()
+  .trim()
+  .min(1, 'Organization name is required.')
+  .max(150, 'Organization name must have at most 150 characters.');
+
+const organizationFieldsSchema = z.object({
+  name: organizationNameSchema,
+});
+
+export const createOrganizationSchema = organizationFieldsSchema;
+
+export const updateOrganizationSchema = organizationFieldsSchema.extend({
+  status: z.enum(ORGANIZATION_STATUSES, {
+    error: 'Organization status is required.',
+  }),
+});
+```
+
+Avoid duplicating validation rules between related forms.
+
+Do not introduce validation rules that are not part of the product or API contract merely because they seem reasonable. New domain constraints should be intentional and aligned with backend behavior.
+
+### Form value types
+
+When appropriate, form value types should be inferred from the Zod schema:
+
+```ts
+export type CreateOrganizationFormValues = z.infer<typeof createOrganizationSchema>;
+```
+
+Do not duplicate the same shape manually in both a Zod schema and a TypeScript type.
+
+Form value types and API request types may remain separate when they represent different responsibilities or require mapping before submission.
+
+### PrimeVue Forms
+
+`@primevue/forms` is the standard form state and validation integration layer for application forms that require structured validation and submission.
+
+Example:
+
+```vue
+<Form
+  v-slot="$form"
+  :initial-values="initialValues"
+  :resolver="resolver"
+  :validate-on-value-update="false"
+  validate-on-blur
+  validate-on-submit
+  novalidate
+  @submit="submit"
+>
+```
+
+Fields should normally be registered through their `name` property:
+
+```vue
+<InputText name="name" :invalid="$form.name?.invalid" />
+```
+
+Validation feedback should be displayed close to the corresponding field.
+
+```vue
+<Message v-if="$form.name?.invalid">
+  {{ $form.name.error?.message }}
+</Message>
+```
+
+The visual treatment of invalid controls and validation messages must follow `docs/design-system.md`.
+
+Avoid maintaining a separate `ref` or `v-model` for a field when PrimeVue Forms already owns that field's state, unless a component integration or specific UX requirement makes it necessary.
+
+### Validation lifecycle
+
+The default validation behavior is:
+
+- do not validate every value change;
+- validate on blur;
+- validate on submit;
+- prevent invalid forms from calling the API.
+
+This provides validation feedback without displaying errors while the user is initially typing.
+
+Individual fields may use different validation triggers when there is a clear UX reason.
+
+### Submit handling
+
+The submit handler should continue only when PrimeVue Forms reports a valid form.
+
+Example:
+
+```ts
+const resolver = zodResolver(createOrganizationSchema);
+
+function submit(event: FormSubmitEvent) {
+  if (!event.valid) {
+    return;
+  }
+
+  // Map form values to the API request and execute the operation.
+}
+```
+
+Do not repeat schema validation manually inside the submit handler.
+
+Submission handlers may map form values to API DTOs when the form model and backend request model differ.
+
+### Frontend vs backend validation
+
+Frontend validation improves user experience but does not replace backend validation.
+
+Suitable frontend validation includes:
+
+- required fields
+- string length
+- format validation
+- allowed enum values
+- simple date constraints when useful for UX
+- client-side transformations such as trimming when they match the expected contract
+
+Rules that depend on trusted server state remain on the backend, including:
+
+- authorization
+- organization membership
+- roles and permissions
+- resource existence
+- resource ownership
+- current persisted status
+- cross-resource consistency
+- security-sensitive business rules
+
+Frontend authorization or validation must never be treated as a security boundary.
+
+### API errors
+
+Keep client-side field validation errors separate from API and business errors.
+
+Zod handles field-level validation such as:
+
+```text
+Organization name is required.
+```
+
+The API handles server-side errors such as:
+
+```text
+ORGANIZATION_NOT_FOUND
+ORGANIZATION_ACCESS_DENIED
+ORGANIZATION_DISABLED
+```
+
+Do not convert every API error into a field validation error.
+
+An API error should be attached to a field only when the backend explicitly reports a field-specific validation problem and the application has a defined mapping for it.
+
+### General rules
+
+- Prefer schema-based validation over manual `if` validation.
+- Do not create one error `ref` per field.
+- Do not use watchers to implement field validation.
+- Do not duplicate schemas between Create and Update when rules can be shared.
+- Do not introduce generic form abstractions prematurely.
+- Keep validation schemas inside the owning feature.
+- Keep validation messages clear, consistent, and user-friendly.
+- Follow `docs/design-system.md` for validation presentation and visual states.
+- Keep backend validation authoritative.
+
+---
+
+## Pinia
 
 Pinia represents shared application state, not every piece of reactive state.
 
@@ -381,7 +597,7 @@ Prefer local state until a genuine cross-screen requirement exists.
 
 ---
 
-# Domain Boundaries
+## Domain Boundaries
 
 Frontend modules should reflect SafeOps domain terminology.
 
@@ -409,11 +625,11 @@ Technical folders may exist inside individual features.
 
 ---
 
-# Reuse Strategy
+## Reuse Strategy
 
 Use three levels of reuse.
 
-## Feature local
+### Feature local
 
 Default location.
 
@@ -423,7 +639,7 @@ Example:
 modules/incident/components/IncidentCard.vue
 ```
 
-## Cross-feature shared
+### Cross-feature shared
 
 Extract only when multiple features genuinely need the behavior.
 
@@ -433,7 +649,7 @@ Example:
 shared/composables/useDebounce.ts
 ```
 
-## Generic UI primitive
+### Generic UI primitive
 
 Use the corresponding PrimeVue component directly.
 
@@ -445,7 +661,7 @@ Avoid premature extraction.
 
 ---
 
-# Authorization
+## Authorization
 
 Authorization rules are enforced by the backend.
 
@@ -460,7 +676,7 @@ Frontend authorization must never be treated as a security boundary.
 
 ---
 
-# Architectural Change
+## Architectural Change
 
 A change is architectural when it introduces or significantly changes:
 

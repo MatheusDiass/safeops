@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Form, type FormSubmitEvent } from '@primevue/forms';
+import { zodResolver } from '@primevue/forms/resolvers/zod';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
@@ -6,6 +8,10 @@ import ProgressSpinner from 'primevue/progressspinner';
 import Select from 'primevue/select';
 import { computed, ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import {
+  updateOrganizationSchema,
+  type UpdateOrganizationFormValues,
+} from '../schemas/organization.schema';
 import { useOrganizationStore } from '../stores/organization.store';
 import type { OrganizationStatus } from '../types/organization.types';
 
@@ -22,9 +28,8 @@ const statusOptions: StatusOption[] = [
 const route = useRoute();
 const router = useRouter();
 const organizationStore = useOrganizationStore();
-const organizationName = ref('');
-const organizationStatus = ref<OrganizationStatus>('ACTIVE');
-const hasSubmitted = ref(false);
+const initialValues = ref<UpdateOrganizationFormValues>({ name: '', status: 'ACTIVE' });
+const resolver = zodResolver(updateOrganizationSchema);
 const isLoading = ref(true);
 const isSubmitting = ref(false);
 const loadErrorMessage = ref<string>();
@@ -34,20 +39,6 @@ const organizationId = computed(() => {
   const routeId = route.params.organizationId;
 
   return Array.isArray(routeId) ? routeId[0] : routeId;
-});
-const normalizedOrganizationName = computed(() => organizationName.value.trim());
-const organizationNameError = computed(() => {
-  const nameLength = normalizedOrganizationName.value.length;
-
-  if (nameLength === 0) {
-    return 'Organization name is required.';
-  }
-
-  if (nameLength < 3 || nameLength > 150) {
-    return 'Organization name must be between 3 and 150 characters.';
-  }
-
-  return undefined;
 });
 
 function getErrorMessage(error: unknown, fallback: string): string {
@@ -66,8 +57,10 @@ async function loadOrganization(): Promise<void> {
 
   try {
     const organization = await organizationStore.loadOrganization(organizationId.value);
-    organizationName.value = organization.name;
-    organizationStatus.value = organization.status;
+    initialValues.value = {
+      name: organization.name,
+      status: organization.status,
+    };
   } catch (error: unknown) {
     loadErrorMessage.value = getErrorMessage(
       error,
@@ -82,11 +75,10 @@ function cancel(): void {
   void router.push({ name: 'organization' });
 }
 
-async function submit(): Promise<void> {
-  hasSubmitted.value = true;
+async function submit(event: FormSubmitEvent): Promise<void> {
   submitErrorMessage.value = undefined;
 
-  if (!organizationId.value || organizationNameError.value) {
+  if (!event.valid || !organizationId.value || isSubmitting.value) {
     return;
   }
 
@@ -94,8 +86,8 @@ async function submit(): Promise<void> {
 
   try {
     await organizationStore.updateOrganization(organizationId.value, {
-      name: normalizedOrganizationName.value,
-      status: organizationStatus.value,
+      name: event.values.name,
+      status: event.values.status,
     });
     await router.replace({ name: 'organization' });
   } catch (error: unknown) {
@@ -106,10 +98,6 @@ async function submit(): Promise<void> {
   } finally {
     isSubmitting.value = false;
   }
-}
-
-function handleSubmit(): void {
-  void submit();
 }
 
 onMounted(() => {
@@ -158,10 +146,17 @@ onMounted(() => {
     </Message>
 
     <template v-else>
-      <form
+      <Form
         id="edit-organization-form"
+        v-slot="$form"
         class="organization-details-card"
-        @submit.prevent="handleSubmit"
+        :initial-values="initialValues"
+        :resolver="resolver"
+        :validate-on-value-update="false"
+        validate-on-blur
+        validate-on-submit
+        novalidate
+        @submit="submit"
       >
         <div class="organization-details-card__header">
           <h2>Organization details</h2>
@@ -172,28 +167,26 @@ onMounted(() => {
           <label for="organization-name">Organization name</label>
           <InputText
             id="organization-name"
-            v-model="organizationName"
+            name="name"
             autocomplete="organization"
-            minlength="3"
-            maxlength="150"
-            required
             :disabled="isSubmitting"
-            :invalid="hasSubmitted && Boolean(organizationNameError)"
-            :aria-invalid="hasSubmitted && Boolean(organizationNameError)"
+            :invalid="$form.name?.invalid"
+            :aria-invalid="$form.name?.invalid"
+            aria-required="true"
             :aria-describedby="
-              hasSubmitted && organizationNameError
-                ? 'organization-name-error'
-                : 'organization-name-hint'
+              $form.name?.invalid ? 'organization-name-error' : 'organization-name-hint'
             "
             fluid
           />
-          <small
-            v-if="hasSubmitted && organizationNameError"
+          <Message
+            v-if="$form.name?.invalid"
             id="organization-name-error"
-            class="field-error"
+            severity="error"
+            size="small"
+            variant="simple"
           >
-            {{ organizationNameError }}
-          </small>
+            {{ $form.name.error?.message }}
+          </Message>
           <small
             v-else
             id="organization-name-hint"
@@ -205,15 +198,35 @@ onMounted(() => {
         <div class="field">
           <label for="organization-status">Status</label>
           <Select
-            v-model="organizationStatus"
+            name="status"
             input-id="organization-status"
             :options="statusOptions"
             option-label="label"
             option-value="value"
             :disabled="isSubmitting"
+            :invalid="$form.status?.invalid"
+            :aria-invalid="$form.status?.invalid"
+            :aria-describedby="
+              $form.status?.invalid ? 'organization-status-error' : 'organization-status-hint'
+            "
+            aria-required="true"
             fluid
           />
-          <small>Disabled organizations are unavailable for active safety operations.</small>
+          <Message
+            v-if="$form.status?.invalid"
+            id="organization-status-error"
+            severity="error"
+            size="small"
+            variant="simple"
+          >
+            {{ $form.status.error?.message }}
+          </Message>
+          <small
+            v-else
+            id="organization-status-hint"
+          >
+            Disabled organizations are unavailable for active safety operations.
+          </small>
         </div>
 
         <Message
@@ -222,7 +235,7 @@ onMounted(() => {
         >
           {{ submitErrorMessage }}
         </Message>
-      </form>
+      </Form>
 
       <div class="edit-organization-page__actions">
         <Button
@@ -355,10 +368,6 @@ onMounted(() => {
 .field small {
   color: var(--p-text-muted-color);
   line-height: 1.4;
-}
-
-.field .field-error {
-  color: var(--p-red-600);
 }
 
 .edit-organization-page__actions {

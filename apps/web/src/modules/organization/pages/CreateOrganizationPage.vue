@@ -1,49 +1,39 @@
 <script setup lang="ts">
+import { Form, type FormSubmitEvent } from '@primevue/forms';
+import { zodResolver } from '@primevue/forms/resolvers/zod';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import {
+  createOrganizationSchema,
+  type CreateOrganizationFormValues,
+} from '../schemas/organization.schema';
 import { useOrganizationStore } from '../stores/organization.store';
 
 const router = useRouter();
 const organizationStore = useOrganizationStore();
-const organizationName = ref('');
-const hasSubmitted = ref(false);
+const initialValues: CreateOrganizationFormValues = { name: '' };
+const resolver = zodResolver(createOrganizationSchema);
 const isSubmitting = ref(false);
 const errorMessage = ref<string>();
-
-const normalizedOrganizationName = computed(() => organizationName.value.trim());
-const organizationNameError = computed(() => {
-  const nameLength = normalizedOrganizationName.value.length;
-
-  if (nameLength === 0) {
-    return 'Organization name is required.';
-  }
-
-  if (nameLength < 3 || nameLength > 150) {
-    return 'Organization name must be between 3 and 150 characters.';
-  }
-
-  return undefined;
-});
 
 function cancel(): void {
   void router.push({ name: 'organization' });
 }
 
-async function submit(): Promise<void> {
-  hasSubmitted.value = true;
+async function submit(event: FormSubmitEvent): Promise<void> {
   errorMessage.value = undefined;
 
-  if (organizationNameError.value) {
+  if (!event.valid || isSubmitting.value) {
     return;
   }
 
   isSubmitting.value = true;
 
   try {
-    await organizationStore.createOrganization({ name: normalizedOrganizationName.value });
+    await organizationStore.createOrganization({ name: event.values.name });
     await router.replace({ name: 'organization' });
   } catch (error: unknown) {
     errorMessage.value =
@@ -53,10 +43,6 @@ async function submit(): Promise<void> {
   } finally {
     isSubmitting.value = false;
   }
-}
-
-function handleSubmit(): void {
-  void submit();
 }
 </script>
 
@@ -70,38 +56,43 @@ function handleSubmit(): void {
       </p>
     </header>
 
-    <form
+    <Form
       id="create-organization-form"
+      v-slot="$form"
       class="create-organization-form"
-      @submit.prevent="handleSubmit"
+      :initial-values="initialValues"
+      :resolver="resolver"
+      :validate-on-value-update="false"
+      validate-on-blur
+      validate-on-submit
+      novalidate
+      @submit="submit"
     >
       <div class="field">
         <label for="organization-name">Organization name</label>
         <InputText
           id="organization-name"
-          v-model="organizationName"
+          name="name"
           autocomplete="organization"
-          minlength="3"
-          maxlength="150"
-          required
           :disabled="isSubmitting"
-          :invalid="hasSubmitted && Boolean(organizationNameError)"
-          :aria-invalid="hasSubmitted && Boolean(organizationNameError)"
+          :invalid="$form.name?.invalid"
+          :aria-invalid="$form.name?.invalid"
+          aria-required="true"
           :aria-describedby="
-            hasSubmitted && organizationNameError
-              ? 'organization-name-error'
-              : 'organization-name-hint'
+            $form.name?.invalid ? 'organization-name-error' : 'organization-name-hint'
           "
           autofocus
           fluid
         />
-        <small
-          v-if="hasSubmitted && organizationNameError"
+        <Message
+          v-if="$form.name?.invalid"
           id="organization-name-error"
-          class="field-error"
+          severity="error"
+          size="small"
+          variant="simple"
         >
-          {{ organizationNameError }}
-        </small>
+          {{ $form.name.error?.message }}
+        </Message>
         <small
           v-else
           id="organization-name-hint"
@@ -116,7 +107,7 @@ function handleSubmit(): void {
       >
         {{ errorMessage }}
       </Message>
-    </form>
+    </Form>
 
     <div class="create-organization-page__actions">
       <Button
@@ -187,10 +178,6 @@ function handleSubmit(): void {
 .field small {
   color: var(--p-text-muted-color);
   line-height: 1.4;
-}
-
-.field .field-error {
-  color: var(--p-red-600);
 }
 
 .create-organization-page__actions {

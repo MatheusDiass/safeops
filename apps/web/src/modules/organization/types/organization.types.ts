@@ -1,4 +1,6 @@
-export type OrganizationStatus = 'ACTIVE' | 'DISABLED';
+export const ORGANIZATION_STATUSES = ['ACTIVE', 'DISABLED'] as const;
+
+export type OrganizationStatus = (typeof ORGANIZATION_STATUSES)[number];
 
 export type CreateOrganizationRequest = {
   name: string;
