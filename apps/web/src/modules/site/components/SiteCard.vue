@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { mdiCalendarOutline, mdiMapMarkerOutline } from '@mdi/js';
+import { mdiCalendarOutline, mdiMapMarkerOutline, mdiPencilOutline } from '@mdi/js';
+import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 import { useI18n } from 'vue-i18n';
 import type { Site, SiteStatus } from '../types/site.types';
@@ -9,6 +10,11 @@ type Props = {
 };
 
 defineProps<Props>();
+
+const emit = defineEmits<{
+  edit: [];
+}>();
+
 const { locale, t } = useI18n();
 
 function getStatusSeverity(status: SiteStatus): 'success' | 'secondary' {
@@ -43,13 +49,34 @@ function formatDate(value: string): string {
     </div>
 
     <div class="site-card__metadata">
-      <svg
-        viewBox="0 0 24 24"
-        aria-hidden="true"
+      <div class="site-card__created">
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path :d="mdiCalendarOutline" />
+        </svg>
+        <span>{{ t('sites.createdAt', { date: formatDate(site.createdAt) }) }}</span>
+      </div>
+      <Button
+        type="button"
+        :label="t('common.actions.edit')"
+        severity="secondary"
+        text
+        size="small"
+        :aria-label="t('sites.aria.edit', { name: site.name })"
+        @click="emit('edit')"
       >
-        <path :d="mdiCalendarOutline" />
-      </svg>
-      <span>{{ t('sites.createdAt', { date: formatDate(site.createdAt) }) }}</span>
+        <template #icon>
+          <svg
+            class="site-card__edit-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path :d="mdiPencilOutline" />
+          </svg>
+        </template>
+      </Button>
     </div>
   </article>
 </template>
@@ -107,6 +134,7 @@ function formatDate(value: string): string {
 .site-card__metadata {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
   padding-top: 1rem;
   border-top: 1px solid var(--p-content-border-color);
@@ -114,10 +142,22 @@ function formatDate(value: string): string {
   font-size: 0.8rem;
 }
 
-.site-card__metadata svg {
+.site-card__created {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.site-card__created svg {
   width: 1rem;
   height: 1rem;
   flex: 0 0 auto;
+  fill: currentcolor;
+}
+
+.site-card__edit-icon {
+  width: 1rem;
+  height: 1rem;
   fill: currentcolor;
 }
 </style>

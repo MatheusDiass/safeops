@@ -57,6 +57,10 @@ watch(
 function openCreateSite(): void {
   void router.push({ name: 'create-site' });
 }
+
+function openEditSite(siteId: string): void {
+  void router.push({ name: 'edit-site', params: { siteId } });
+}
 </script>
 
 <template>
@@ -136,6 +140,7 @@ function openCreateSite(): void {
           v-for="site in filteredSites"
           :key="site.id"
           :site="site"
+          @edit="openEditSite(site.id)"
         />
       </section>
 

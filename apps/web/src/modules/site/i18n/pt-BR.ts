@@ -23,16 +23,27 @@ export default {
       title: 'Criar local',
       description: 'Adicione um local a {organization} para gerenciar suas operações de segurança.',
     },
+    edit: {
+      title: 'Editar local',
+      description: 'Atualize o nome e a disponibilidade do local em seu espaço de trabalho.',
+      detailsTitle: 'Detalhes do local',
+      detailsDescription: 'Gerencie os dados de identificação e o status atual deste local.',
+    },
     fields: {
       name: {
         label: 'Nome do local',
         hint: 'Use entre 3 e 150 caracteres.',
+      },
+      status: {
+        label: 'Status',
+        hint: 'Locais desabilitados não ficam disponíveis para operações de segurança ativas.',
       },
     },
     validation: {
       nameRequired: 'O nome do local é obrigatório.',
       nameMin: 'O nome do local deve ter pelo menos 3 caracteres.',
       nameMax: 'O nome do local deve ter no máximo 150 caracteres.',
+      statusRequired: 'O status do local é obrigatório.',
     },
     selectOrganization: {
       title: 'Selecione uma organização',
@@ -46,11 +57,14 @@ export default {
     loading: 'Carregando locais...',
     loadingLabel: 'Carregando locais',
     errors: {
+      notFound: 'Local não encontrado.',
       create: 'Não foi possível criar o local. Tente novamente.',
       load: 'Não foi possível carregar os locais. Tente novamente.',
+      update: 'Não foi possível atualizar o local. Tente novamente.',
     },
     aria: {
       list: 'Locais',
+      edit: 'Editar {name}',
     },
   },
 };

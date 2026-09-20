@@ -13,3 +13,8 @@ export type Site = {
 export type CreateSiteRequest = {
   name: string;
 };
+
+export type UpdateSiteRequest = {
+  name?: string;
+  status?: SiteStatus;
+};
