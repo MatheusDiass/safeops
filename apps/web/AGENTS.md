@@ -284,6 +284,25 @@ docs/design-system.md
 
 ---
 
+## Internationalization
+
+- All user-facing text must use the project's `vue-i18n` system.
+- Do not hardcode Portuguese or English user-facing strings in Vue components.
+- Use semantic translation keys; never use displayed text as a key.
+- Shared translations belong in `src/i18n/shared`.
+- Feature-specific translations belong in `src/modules/<feature>/i18n`.
+- Name feature locale files by locale, such as `pt-BR.ts` and `en-US.ts`.
+- Use the centralized locale definitions instead of duplicating locale strings.
+- Keep API enum and domain values unchanged and translate them only for presentation.
+- Never translate domain values before sending them to the API.
+- Translate user-facing validation messages.
+- Pass the translation function into Zod schemas instead of importing the global i18n instance.
+- UI components must use the existing locale utilities; they must not duplicate locale persistence logic or access `localStorage` directly.
+- Keep language selector names self-named as `Português` and `English`.
+- Add translations only for features that currently need them; do not create speculative keys for future functionality.
+
+---
+
 ## TypeScript
 
 Keep TypeScript strict.

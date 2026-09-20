@@ -404,27 +404,7 @@ Create the `schemas/` directory only when the feature actually contains validati
 
 Schemas should reuse shared field rules when Create and Update forms validate the same fields.
 
-Example:
-
-```ts
-const organizationNameSchema = z
-  .string()
-  .trim()
-  .min(1, 'Organization name is required.')
-  .max(150, 'Organization name must have at most 150 characters.');
-
-const organizationFieldsSchema = z.object({
-  name: organizationNameSchema,
-});
-
-export const createOrganizationSchema = organizationFieldsSchema;
-
-export const updateOrganizationSchema = organizationFieldsSchema.extend({
-  status: z.enum(ORGANIZATION_STATUSES, {
-    error: 'Organization status is required.',
-  }),
-});
-```
+Schemas with user-facing validation messages must follow the translation dependency pattern documented in [Internationalization](#internationalization).
 
 Avoid duplicating validation rules between related forms.
 
@@ -499,7 +479,7 @@ The submit handler should continue only when PrimeVue Forms reports a valid form
 Example:
 
 ```ts
-const resolver = zodResolver(createOrganizationSchema);
+const resolver = zodResolver(createOrganizationSchema(t));
 
 function submit(event: FormSubmitEvent) {
   if (!event.valid) {
@@ -573,6 +553,86 @@ An API error should be attached to a field only when the backend explicitly repo
 - Keep validation messages clear, consistent, and user-friendly.
 - Follow `docs/design-system.md` for validation presentation and visual states.
 - Keep backend validation authoritative.
+
+---
+
+## Internationalization
+
+SafeOps uses `vue-i18n`. The supported locales are `pt-BR` and `en-US`; `pt-BR` is the default locale and `en-US` is the fallback locale.
+
+Locale definitions and global i18n configuration are centralized under `src/i18n`. Shared translations belong in:
+
+```text
+src/i18n/shared/
+├── pt-BR.ts
+└── en-US.ts
+```
+
+Feature-specific translations remain with the owning feature:
+
+```text
+src/modules/<feature>/i18n/
+├── pt-BR.ts
+└── en-US.ts
+```
+
+The current examples are `src/modules/auth/i18n` and `src/modules/organization/i18n`. Their translation namespaces are `auth` and `organizations`, respectively.
+
+Translation keys describe meaning and context rather than copying displayed text. Examples include:
+
+```text
+common.actions.save
+auth.login.title
+organizations.fields.name.label
+organizations.validation.nameRequired
+organizations.status.ACTIVE
+```
+
+Displayed Portuguese or English text must not be used as a translation key.
+
+### API values
+
+API enum and domain values remain unchanged and are translated only in the presentation layer.
+
+```ts
+t(`organizations.status.${organization.status}`);
+```
+
+Never translate enum or domain values before sending them to the backend.
+
+### Validation
+
+Zod schemas that need translated validation messages receive the translation function as a dependency. They do not import the global i18n instance.
+
+Prefer resolving the message when the validation error occurs so it uses the current locale:
+
+```ts
+type Translate = (key: string) => string;
+
+export function createOrganizationSchema(t: Translate) {
+  return z.object({
+    name: z
+      .string()
+      .trim()
+      .min(3, {
+        error: () => t('organizations.validation.nameMin'),
+      }),
+  });
+}
+```
+
+### Locale selection
+
+Locale selection, browser detection, fallback behavior, and persistence are handled by the centralized `src/i18n` locale layer. UI components use the existing locale utilities and must not implement their own persistence logic or access `localStorage` directly.
+
+The language selector displays each language using its native name, independent of the current application locale:
+
+```text
+Português
+English
+```
+
+The Brazil and United States flags may be used as visual representations of the currently supported `pt-BR` and `en-US` locales. The locale value remains the authoritative selection.
 
 ---
 
