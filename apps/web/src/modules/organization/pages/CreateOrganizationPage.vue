@@ -4,8 +4,9 @@ import { zodResolver } from '@primevue/forms/resolvers/zod';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import {
   createOrganizationSchema,
   type CreateOrganizationFormValues,
@@ -13,9 +14,10 @@ import {
 import { useOrganizationStore } from '../stores/organization.store';
 
 const router = useRouter();
+const { t } = useI18n();
 const organizationStore = useOrganizationStore();
 const initialValues: CreateOrganizationFormValues = { name: '' };
-const resolver = zodResolver(createOrganizationSchema);
+const resolver = computed(() => zodResolver(createOrganizationSchema(t)));
 const isSubmitting = ref(false);
 const errorMessage = ref<string>();
 
@@ -36,10 +38,7 @@ async function submit(event: FormSubmitEvent): Promise<void> {
     await organizationStore.createOrganization({ name: event.values.name });
     await router.replace({ name: 'organization' });
   } catch (error: unknown) {
-    errorMessage.value =
-      error instanceof Error
-        ? error.message
-        : 'Unable to create the organization. Please try again.';
+    errorMessage.value = error instanceof Error ? error.message : t('organizations.errors.create');
   } finally {
     isSubmitting.value = false;
   }
@@ -49,10 +48,10 @@ async function submit(event: FormSubmitEvent): Promise<void> {
 <template>
   <main class="create-organization-page">
     <header>
-      <p class="create-organization-page__eyebrow">Organizations</p>
-      <h1>Create organization</h1>
+      <p class="create-organization-page__eyebrow">{{ t('organizations.title') }}</p>
+      <h1>{{ t('organizations.create.title') }}</h1>
       <p class="create-organization-page__description">
-        Add an organization to start managing its sites and safety operations.
+        {{ t('organizations.create.description') }}
       </p>
     </header>
 
@@ -69,7 +68,7 @@ async function submit(event: FormSubmitEvent): Promise<void> {
       @submit="submit"
     >
       <div class="field">
-        <label for="organization-name">Organization name</label>
+        <label for="organization-name">{{ t('organizations.fields.name.label') }}</label>
         <InputText
           id="organization-name"
           name="name"
@@ -97,7 +96,7 @@ async function submit(event: FormSubmitEvent): Promise<void> {
           v-else
           id="organization-name-hint"
         >
-          Use between 3 and 150 characters.
+          {{ t('organizations.fields.name.hint') }}
         </small>
       </div>
 
@@ -112,7 +111,7 @@ async function submit(event: FormSubmitEvent): Promise<void> {
     <div class="create-organization-page__actions">
       <Button
         type="button"
-        label="Cancel"
+        :label="t('common.actions.cancel')"
         severity="secondary"
         outlined
         :disabled="isSubmitting"
@@ -121,7 +120,7 @@ async function submit(event: FormSubmitEvent): Promise<void> {
       <Button
         type="submit"
         form="create-organization-form"
-        label="Create organization"
+        :label="t('organizations.actions.create')"
         :loading="isSubmitting"
         :disabled="isSubmitting"
       />

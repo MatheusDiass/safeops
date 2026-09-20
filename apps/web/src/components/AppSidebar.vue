@@ -11,6 +11,7 @@ import Select from 'primevue/select';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useOrganizationStore } from '../modules/organization/stores/organization.store';
 import type { Organization } from '../modules/organization/types/organization.types';
 import SafeOpsMark from './SafeOpsMark.vue';
@@ -34,19 +35,28 @@ const emit = defineEmits<{
 }>();
 
 const route = useRoute();
+const { t } = useI18n();
 const organizationStore = useOrganizationStore();
 const { organizations, selectedOrganizationId } = storeToRefs(organizationStore);
 const selectedOrganization = computed(() =>
   organizations.value.find((organization) => organization.id === selectedOrganizationId.value),
 );
 
-const navigationItems: NavigationItem[] = [
-  { label: 'Dashboard', routeName: 'dashboard', icon: mdiViewDashboardOutline },
-  { label: 'Organizations', routeName: 'organization', icon: mdiOfficeBuildingOutline },
-  { label: 'Sites', routeName: 'sites', icon: mdiMapMarkerMultipleOutline },
-  { label: 'Incidents', routeName: 'incidents', icon: mdiAlertCircleOutline },
-  { label: 'Account', routeName: 'account', icon: mdiAccountCircleOutline },
-];
+const navigationItems = computed<NavigationItem[]>(() => [
+  {
+    label: t('common.navigation.dashboard'),
+    routeName: 'dashboard',
+    icon: mdiViewDashboardOutline,
+  },
+  { label: t('organizations.title'), routeName: 'organization', icon: mdiOfficeBuildingOutline },
+  { label: t('common.navigation.sites'), routeName: 'sites', icon: mdiMapMarkerMultipleOutline },
+  {
+    label: t('common.navigation.incidents'),
+    routeName: 'incidents',
+    icon: mdiAlertCircleOutline,
+  },
+  { label: t('common.navigation.account'), routeName: 'account', icon: mdiAccountCircleOutline },
+]);
 
 function isActive(routeName: string): boolean {
   return route.name === routeName;
@@ -62,7 +72,8 @@ function getOrganizationInitials(organization: Organization): string {
 }
 
 function getSiteCountLabel(siteCount: number): string {
-  return `${siteCount} ${siteCount === 1 ? 'site' : 'sites'}`;
+  const key = siteCount === 1 ? 'organizations.sites.singular' : 'organizations.sites.plural';
+  return t(key, { count: siteCount });
 }
 </script>
 
@@ -86,7 +97,7 @@ function getSiteCountLabel(siteCount: number): string {
         v-if="showCloseButton"
         class="app-sidebar__close"
         type="button"
-        aria-label="Close navigation"
+        :aria-label="t('common.navigation.close')"
         @click="emit('close')"
       >
         <svg
@@ -99,7 +110,7 @@ function getSiteCountLabel(siteCount: number): string {
     </header>
 
     <div class="organization-field">
-      <label for="organization-selector">Organization</label>
+      <label for="organization-selector">{{ t('organizations.fields.selector.label') }}</label>
       <Select
         v-model="selectedOrganizationId"
         input-id="organization-selector"
@@ -138,9 +149,9 @@ function getSiteCountLabel(siteCount: number): string {
 
     <nav
       class="workspace-navigation"
-      aria-label="Workspace"
+      :aria-label="t('common.navigation.workspace')"
     >
-      <p class="workspace-navigation__title">Workspace</p>
+      <p class="workspace-navigation__title">{{ t('common.navigation.workspace') }}</p>
       <ul>
         <li
           v-for="item in navigationItems"

@@ -1,8 +1,10 @@
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { registerUser } from '../api/auth.api';
 import type { RegisterUserRequest } from '../types/auth.types';
 
 export function useRegistration() {
+  const { t } = useI18n();
   const isSubmitting = ref(false);
   const errorMessage = ref<string>();
   const isComplete = ref(false);
@@ -17,7 +19,7 @@ export function useRegistration() {
       isComplete.value = true;
     } catch (error: unknown) {
       errorMessage.value =
-        error instanceof Error ? error.message : 'Unable to create your account. Please try again.';
+        error instanceof Error ? error.message : t('auth.registration.errors.generic');
     } finally {
       isSubmitting.value = false;
     }

@@ -2,6 +2,7 @@
 import { mdiMapMarkerMultipleOutline, mdiPencilOutline } from '@mdi/js';
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
+import { useI18n } from 'vue-i18n';
 import type { Organization, OrganizationStatus } from '../types/organization.types';
 
 type Props = {
@@ -9,6 +10,7 @@ type Props = {
 };
 
 defineProps<Props>();
+const { t } = useI18n();
 
 const emit = defineEmits<{
   edit: [];
@@ -24,7 +26,7 @@ function getInitials(name: string): string {
 }
 
 function getStatusLabel(status: OrganizationStatus): string {
-  return status === 'ACTIVE' ? 'Active' : 'Disabled';
+  return t(`organizations.status.${status}`);
 }
 
 function getStatusSeverity(status: OrganizationStatus): 'success' | 'secondary' {
@@ -32,7 +34,8 @@ function getStatusSeverity(status: OrganizationStatus): 'success' | 'secondary' 
 }
 
 function getSiteCountLabel(siteCount: number): string {
-  return `${siteCount} ${siteCount === 1 ? 'site' : 'sites'}`;
+  const key = siteCount === 1 ? 'organizations.sites.singular' : 'organizations.sites.plural';
+  return t(key, { count: siteCount });
 }
 </script>
 
@@ -66,11 +69,11 @@ function getSiteCountLabel(siteCount: number): string {
       </div>
       <Button
         type="button"
-        label="Edit"
+        :label="t('common.actions.edit')"
         severity="secondary"
         text
         size="small"
-        :aria-label="`Edit ${organization.name}`"
+        :aria-label="t('organizations.aria.edit', { name: organization.name })"
         @click="emit('edit')"
       >
         <template #icon>

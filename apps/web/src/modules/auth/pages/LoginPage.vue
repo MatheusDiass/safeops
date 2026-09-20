@@ -6,7 +6,9 @@ import Message from 'primevue/message';
 import Password from 'primevue/password';
 import AuthLayout from '../../../layouts/AuthLayout.vue';
 import { useLogin } from '../composables/useLogin';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const email = ref('');
 const password = ref('');
 const { errorMessage, isSubmitting, submit } = useLogin();
@@ -18,16 +20,14 @@ function handleSubmit(): void {
 
 <template>
   <AuthLayout>
-    <template #title>Sign in to SafeOps</template>
-    <template #subtitle
-      >Use your work account to access your organizations and incident queue.</template
-    >
+    <template #title>{{ t('auth.login.title') }}</template>
+    <template #subtitle>{{ t('auth.login.subtitle') }}</template>
     <form
       class="login-form"
       @submit.prevent="handleSubmit"
     >
       <div class="field">
-        <label for="email">Work email</label>
+        <label for="email">{{ t('auth.fields.email') }}</label>
         <InputText
           id="email"
           v-model="email"
@@ -43,7 +43,8 @@ function handleSubmit(): void {
 
       <div class="field">
         <div class="field__header">
-          <label for="password">Password</label><a href="/forgot-password">Forgot password?</a>
+          <label for="password">{{ t('auth.fields.password') }}</label
+          ><a href="/forgot-password">{{ t('auth.login.actions.forgotPassword') }}</a>
         </div>
         <Password
           v-model="password"
@@ -69,14 +70,15 @@ function handleSubmit(): void {
 
       <Button
         type="submit"
-        label="Sign in"
+        :label="t('auth.login.actions.submit')"
         :loading="isSubmitting"
         :disabled="isSubmitting"
         fluid
       />
     </form>
-    <template #footer
-      >Don't have an account? <RouterLink to="/register">Create one</RouterLink></template
-    >
+    <template #footer>
+      {{ t('auth.login.registrationPrompt') }}
+      <RouterLink to="/register">{{ t('auth.login.registrationLink') }}</RouterLink>
+    </template>
   </AuthLayout>
 </template>

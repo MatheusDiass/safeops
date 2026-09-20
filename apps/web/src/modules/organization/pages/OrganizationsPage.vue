@@ -5,18 +5,21 @@ import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import OrganizationCard from '../components/OrganizationCard.vue';
 import { useOrganizationStore } from '../stores/organization.store';
 
 const organizationStore = useOrganizationStore();
 const router = useRouter();
+const { t } = useI18n();
 const { organizations } = storeToRefs(organizationStore);
 const searchQuery = ref('');
 
 const hasOrganizations = computed(() => organizations.value.length > 0);
 const organizationCountLabel = computed(() => {
   const count = organizations.value.length;
-  return `You belong to ${count} ${count === 1 ? 'organization' : 'organizations'}.`;
+  const key = count === 1 ? 'organizations.summary.singular' : 'organizations.summary.plural';
+  return t(key, { count });
 });
 const filteredOrganizations = computed(() => {
   const query = searchQuery.value.trim().toLocaleLowerCase();
@@ -43,8 +46,8 @@ function openEditOrganization(organizationId: string): void {
   <main class="organizations-page">
     <header class="organizations-page__header">
       <div>
-        <p class="organizations-page__eyebrow">Workspace</p>
-        <h1>Organizations</h1>
+        <p class="organizations-page__eyebrow">{{ t('organizations.workspace') }}</p>
+        <h1>{{ t('organizations.title') }}</h1>
         <p class="organizations-page__subtitle">{{ organizationCountLabel }}</p>
       </div>
 
@@ -60,7 +63,7 @@ function openEditOrganization(organizationId: string): void {
         >
           <path :d="mdiPlus" />
         </svg>
-        <span>New organization</span>
+        <span>{{ t('organizations.actions.new') }}</span>
       </Button>
     </header>
 
@@ -77,8 +80,8 @@ function openEditOrganization(organizationId: string): void {
       <InputText
         v-model="searchQuery"
         type="search"
-        placeholder="Search organizations"
-        aria-label="Search organizations by name"
+        :placeholder="t('organizations.search.placeholder')"
+        :aria-label="t('organizations.search.label')"
         fluid
       />
     </div>
@@ -86,7 +89,7 @@ function openEditOrganization(organizationId: string): void {
     <section
       v-if="hasOrganizations && filteredOrganizations.length > 0"
       class="organizations-grid"
-      aria-label="Organizations"
+      :aria-label="t('organizations.aria.list')"
     >
       <OrganizationCard
         v-for="organization in filteredOrganizations"
@@ -101,8 +104,8 @@ function openEditOrganization(organizationId: string): void {
       class="organizations-no-results"
       aria-live="polite"
     >
-      <h2>No organizations found</h2>
-      <p>Try searching for a different organization name.</p>
+      <h2>{{ t('organizations.search.noResultsTitle') }}</h2>
+      <p>{{ t('organizations.search.noResultsDescription') }}</p>
     </section>
 
     <section
@@ -118,8 +121,8 @@ function openEditOrganization(organizationId: string): void {
         </svg>
       </span>
       <div>
-        <h2>Create your first organization</h2>
-        <p>Organizations bring your sites and safety operations together in one workspace.</p>
+        <h2>{{ t('organizations.empty.title') }}</h2>
+        <p>{{ t('organizations.empty.description') }}</p>
       </div>
       <Button
         type="button"
@@ -132,7 +135,7 @@ function openEditOrganization(organizationId: string): void {
         >
           <path :d="mdiPlus" />
         </svg>
-        <span>Create organization</span>
+        <span>{{ t('organizations.actions.create') }}</span>
       </Button>
     </section>
   </main>

@@ -5,12 +5,15 @@ import Drawer from 'primevue/drawer';
 import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AppSidebar from '../components/AppSidebar.vue';
+import LanguageSelector from '../components/LanguageSelector.vue';
 import SafeOpsMark from '../components/SafeOpsMark.vue';
 import { useLogout } from '../modules/auth/composables/useLogout';
 
 const isNavigationOpen = ref(false);
 const searchQuery = ref('');
+const { t } = useI18n();
 const { errorMessage, isLoggingOut, logout } = useLogout();
 
 function handleLogout(): void {
@@ -44,7 +47,7 @@ function handleLogout(): void {
         <button
           class="app-layout__menu-button"
           type="button"
-          aria-label="Open navigation"
+          :aria-label="t('common.navigation.open')"
           @click="isNavigationOpen = true"
         >
           <svg
@@ -74,12 +77,14 @@ function handleLogout(): void {
             v-model="searchQuery"
             class="topbar-search__input"
             type="search"
-            placeholder="Search incidents, sites, people"
-            aria-label="Search incidents, sites, people"
+            :placeholder="t('common.search.placeholder')"
+            :aria-label="t('common.search.placeholder')"
           />
         </div>
 
         <div class="topbar-actions">
+          <LanguageSelector />
+
           <Button
             type="button"
             severity="secondary"

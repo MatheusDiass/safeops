@@ -8,6 +8,7 @@ import ProgressSpinner from 'primevue/progressspinner';
 import Select from 'primevue/select';
 import { computed, ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import {
   updateOrganizationSchema,
   type UpdateOrganizationFormValues,
@@ -20,16 +21,16 @@ type StatusOption = {
   value: OrganizationStatus;
 };
 
-const statusOptions: StatusOption[] = [
-  { label: 'Active', value: 'ACTIVE' },
-  { label: 'Disabled', value: 'DISABLED' },
-];
-
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 const organizationStore = useOrganizationStore();
+const statusOptions = computed<StatusOption[]>(() => [
+  { label: t('organizations.status.ACTIVE'), value: 'ACTIVE' },
+  { label: t('organizations.status.DISABLED'), value: 'DISABLED' },
+]);
 const initialValues = ref<UpdateOrganizationFormValues>({ name: '', status: 'ACTIVE' });
-const resolver = zodResolver(updateOrganizationSchema);
+const resolver = computed(() => zodResolver(updateOrganizationSchema(t)));
 const isLoading = ref(true);
 const isSubmitting = ref(false);
 const loadErrorMessage = ref<string>();
@@ -47,7 +48,7 @@ function getErrorMessage(error: unknown, fallback: string): string {
 
 async function loadOrganization(): Promise<void> {
   if (!organizationId.value) {
-    loadErrorMessage.value = 'Organization not found.';
+    loadErrorMessage.value = t('organizations.errors.notFound');
     isLoading.value = false;
     return;
   }
@@ -62,10 +63,7 @@ async function loadOrganization(): Promise<void> {
       status: organization.status,
     };
   } catch (error: unknown) {
-    loadErrorMessage.value = getErrorMessage(
-      error,
-      'Unable to load the organization. Please try again.',
-    );
+    loadErrorMessage.value = getErrorMessage(error, t('organizations.errors.load'));
   } finally {
     isLoading.value = false;
   }
@@ -91,10 +89,7 @@ async function submit(event: FormSubmitEvent): Promise<void> {
     });
     await router.replace({ name: 'organization' });
   } catch (error: unknown) {
-    submitErrorMessage.value = getErrorMessage(
-      error,
-      'Unable to update the organization. Please try again.',
-    );
+    submitErrorMessage.value = getErrorMessage(error, t('organizations.errors.update'));
   } finally {
     isSubmitting.value = false;
   }
@@ -108,10 +103,10 @@ onMounted(() => {
 <template>
   <main class="edit-organization-page">
     <header>
-      <p class="edit-organization-page__eyebrow">Organizations</p>
-      <h1>Edit organization</h1>
+      <p class="edit-organization-page__eyebrow">{{ t('organizations.title') }}</p>
+      <h1>{{ t('organizations.edit.title') }}</h1>
       <p class="edit-organization-page__description">
-        Update the organization name and availability across your workspace.
+        {{ t('organizations.edit.description') }}
       </p>
     </header>
 
@@ -119,13 +114,13 @@ onMounted(() => {
       v-if="isLoading"
       class="edit-organization-page__loading"
       role="status"
-      aria-label="Loading organization"
+      :aria-label="t('organizations.loadingLabel')"
     >
       <ProgressSpinner
         class="edit-organization-page__spinner"
         stroke-width="5"
       />
-      <span>Loading organization...</span>
+      <span>{{ t('organizations.loading') }}</span>
     </div>
 
     <Message
@@ -136,7 +131,7 @@ onMounted(() => {
         <span>{{ loadErrorMessage }}</span>
         <Button
           type="button"
-          label="Try again"
+          :label="t('common.actions.retry')"
           severity="danger"
           text
           size="small"
@@ -159,12 +154,12 @@ onMounted(() => {
         @submit="submit"
       >
         <div class="organization-details-card__header">
-          <h2>Organization details</h2>
-          <p>Manage the identifying details and current status of this organization.</p>
+          <h2>{{ t('organizations.edit.detailsTitle') }}</h2>
+          <p>{{ t('organizations.edit.detailsDescription') }}</p>
         </div>
 
         <div class="field">
-          <label for="organization-name">Organization name</label>
+          <label for="organization-name">{{ t('organizations.fields.name.label') }}</label>
           <InputText
             id="organization-name"
             name="name"
@@ -191,12 +186,12 @@ onMounted(() => {
             v-else
             id="organization-name-hint"
           >
-            Use between 3 and 150 characters.
+            {{ t('organizations.fields.name.hint') }}
           </small>
         </div>
 
         <div class="field">
-          <label for="organization-status">Status</label>
+          <label for="organization-status">{{ t('organizations.fields.status.label') }}</label>
           <Select
             name="status"
             input-id="organization-status"
@@ -225,7 +220,7 @@ onMounted(() => {
             v-else
             id="organization-status-hint"
           >
-            Disabled organizations are unavailable for active safety operations.
+            {{ t('organizations.fields.status.hint') }}
           </small>
         </div>
 
@@ -240,7 +235,7 @@ onMounted(() => {
       <div class="edit-organization-page__actions">
         <Button
           type="button"
-          label="Cancel"
+          :label="t('common.actions.cancel')"
           severity="secondary"
           outlined
           :disabled="isSubmitting"
@@ -249,7 +244,7 @@ onMounted(() => {
         <Button
           type="submit"
           form="edit-organization-form"
-          label="Save changes"
+          :label="t('common.actions.save')"
           :loading="isSubmitting"
           :disabled="isSubmitting"
         />
@@ -260,18 +255,18 @@ onMounted(() => {
         aria-labelledby="danger-zone-title"
       >
         <div>
-          <h2 id="danger-zone-title">Danger zone</h2>
-          <p>Deleting an organization is permanent and cannot be undone.</p>
+          <h2 id="danger-zone-title">{{ t('organizations.dangerZone.title') }}</h2>
+          <p>{{ t('organizations.dangerZone.description') }}</p>
         </div>
         <div class="danger-zone__action">
           <Button
             type="button"
-            label="Delete organization"
+            :label="t('organizations.actions.delete')"
             severity="danger"
             outlined
             disabled
           />
-          <small>Not available yet</small>
+          <small>{{ t('organizations.dangerZone.unavailable') }}</small>
         </div>
       </section>
     </template>

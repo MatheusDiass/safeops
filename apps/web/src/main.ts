@@ -6,6 +6,7 @@ import App from './App.vue';
 import { initializeAuthenticatedApplication } from './app/initializeAuthenticatedApplication';
 import { router } from './app/router';
 import { SafeOpsPreset } from './app/theme/safeops.preset';
+import { i18n } from './i18n';
 import { useAuthStore } from './modules/auth/stores/auth.store';
 import { configureAccessTokenProvider } from './shared/api/http';
 
@@ -21,6 +22,7 @@ app
       },
     },
   })
+  .use(i18n)
   .use(pinia);
 
 configureAccessTokenProvider(() => useAuthStore(pinia).accessToken);

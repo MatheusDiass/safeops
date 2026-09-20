@@ -1,11 +1,13 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { login } from '../api/auth.api';
 import { useAuthStore } from '../stores/auth.store';
 import { useOrganizationStore } from '../../organization/stores/organization.store';
 
 export function useLogin() {
   const router = useRouter();
+  const { t } = useI18n();
   const authStore = useAuthStore();
   const organizationStore = useOrganizationStore();
   const isSubmitting = ref(false);
@@ -34,8 +36,7 @@ export function useLogin() {
 
       await router.push({ name: 'dashboard' });
     } catch (error: unknown) {
-      errorMessage.value =
-        error instanceof Error ? error.message : 'Unable to sign in. Please try again.';
+      errorMessage.value = error instanceof Error ? error.message : t('auth.login.errors.generic');
     } finally {
       isSubmitting.value = false;
     }

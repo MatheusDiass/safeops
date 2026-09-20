@@ -1,24 +1,38 @@
 import { z } from 'zod';
 import { ORGANIZATION_STATUSES } from '../types/organization.types';
 
-const organizationNameSchema = z
-  .string()
-  .trim()
-  .min(1, 'Organization name is required.')
-  .min(3, 'Organization name must have at least 3 characters.')
-  .max(150, 'Organization name must have at most 150 characters.');
+type Translate = (key: string) => string;
 
-const organizationFieldsSchema = z.object({
-  name: organizationNameSchema,
-});
+function organizationFieldsSchema(t: Translate) {
+  const organizationNameSchema = z
+    .string()
+    .trim()
+    .min(1, {
+      error: () => t('organizations.validation.nameRequired'),
+    })
+    .min(3, {
+      error: () => t('organizations.validation.nameMin'),
+    })
+    .max(150, {
+      error: () => t('organizations.validation.nameMax'),
+    });
 
-export const createOrganizationSchema = organizationFieldsSchema;
+  return z.object({
+    name: organizationNameSchema,
+  });
+}
 
-export const updateOrganizationSchema = organizationFieldsSchema.extend({
-  status: z.enum(ORGANIZATION_STATUSES, {
-    error: 'Organization status is required.',
-  }),
-});
+export function createOrganizationSchema(t: Translate) {
+  return organizationFieldsSchema(t);
+}
 
-export type CreateOrganizationFormValues = z.infer<typeof createOrganizationSchema>;
-export type UpdateOrganizationFormValues = z.infer<typeof updateOrganizationSchema>;
+export function updateOrganizationSchema(t: Translate) {
+  return organizationFieldsSchema(t).extend({
+    status: z.enum(ORGANIZATION_STATUSES, {
+      error: () => t('organizations.validation.statusRequired'),
+    }),
+  });
+}
+
+export type CreateOrganizationFormValues = z.infer<ReturnType<typeof createOrganizationSchema>>;
+export type UpdateOrganizationFormValues = z.infer<ReturnType<typeof updateOrganizationSchema>>;

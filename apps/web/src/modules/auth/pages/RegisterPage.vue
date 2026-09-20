@@ -6,7 +6,9 @@ import Message from 'primevue/message';
 import Password from 'primevue/password';
 import AuthLayout from '../../../layouts/AuthLayout.vue';
 import { useRegistration } from '../composables/useRegistration';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const name = ref('');
 const email = ref('');
 const password = ref('');
@@ -35,14 +37,14 @@ function handleSubmit(): void {
 
 <template>
   <AuthLayout>
-    <template #title>Create your SafeOps account</template>
-    <template #subtitle>Set up your work account to start managing safety operations.</template>
+    <template #title>{{ t('auth.registration.title') }}</template>
+    <template #subtitle>{{ t('auth.registration.subtitle') }}</template>
     <form
       class="login-form"
       @submit.prevent="handleSubmit"
     >
       <div class="field">
-        <label for="name">Full name</label>
+        <label for="name">{{ t('auth.registration.fields.name') }}</label>
         <InputText
           id="name"
           v-model="name"
@@ -54,7 +56,7 @@ function handleSubmit(): void {
       </div>
 
       <div class="field">
-        <label for="email">Work email</label>
+        <label for="email">{{ t('auth.fields.email') }}</label>
         <InputText
           id="email"
           v-model="email"
@@ -69,7 +71,7 @@ function handleSubmit(): void {
       </div>
 
       <div class="field">
-        <label for="password">Password</label>
+        <label for="password">{{ t('auth.fields.password') }}</label>
         <Password
           v-model="password"
           input-id="password"
@@ -81,11 +83,11 @@ function handleSubmit(): void {
           aria-describedby="password-hint"
           fluid
         />
-        <small id="password-hint">Use between 15 and 128 characters.</small>
+        <small id="password-hint">{{ t('auth.registration.passwordHint') }}</small>
       </div>
 
       <div class="field">
-        <label for="confirm-password">Confirm password</label>
+        <label for="confirm-password">{{ t('auth.registration.fields.confirmPassword') }}</label>
         <Password
           v-model="confirmPassword"
           input-id="confirm-password"
@@ -103,7 +105,7 @@ function handleSubmit(): void {
           id="confirm-password-error"
           class="field-error"
         >
-          Passwords do not match.
+          {{ t('auth.registration.passwordMismatch') }}
         </small>
       </div>
 
@@ -119,20 +121,21 @@ function handleSubmit(): void {
         v-if="isComplete"
         severity="success"
       >
-        Your account has been created. You can now sign in.
+        {{ t('auth.registration.success') }}
       </Message>
 
       <Button
         type="submit"
-        label="Create account"
+        :label="t('auth.registration.actions.submit')"
         :loading="isSubmitting"
         :disabled="isSubmitting || isComplete"
         fluid
       />
     </form>
 
-    <template #footer
-      >Already have an account? <RouterLink to="/login">Sign in</RouterLink></template
-    >
+    <template #footer>
+      {{ t('auth.registration.loginPrompt') }}
+      <RouterLink to="/login">{{ t('auth.registration.loginLink') }}</RouterLink>
+    </template>
   </AuthLayout>
 </template>
