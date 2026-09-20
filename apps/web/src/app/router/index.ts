@@ -5,6 +5,7 @@ import RegisterPage from '../../modules/auth/pages/RegisterPage.vue';
 import CreateOrganizationPage from '../../modules/organization/pages/CreateOrganizationPage.vue';
 import EditOrganizationPage from '../../modules/organization/pages/EditOrganizationPage.vue';
 import OrganizationsPage from '../../modules/organization/pages/OrganizationsPage.vue';
+import CreateSitePage from '../../modules/site/pages/CreateSitePage.vue';
 import SitesPage from '../../modules/site/pages/SitesPage.vue';
 import WorkspacePage from '../../modules/workspace/pages/WorkspacePage.vue';
 
@@ -60,6 +61,15 @@ export const router = createRouter({
           meta: {
             title: 'Sites',
             description: 'View and manage the sites connected to this organization.',
+          },
+        },
+        {
+          path: 'sites/new',
+          name: 'create-site',
+          component: CreateSitePage,
+          meta: {
+            title: 'Create site',
+            description: 'Create a new site for the selected organization.',
           },
         },
         {

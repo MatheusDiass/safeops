@@ -12,16 +12,11 @@ export function useSiteList() {
 
   let latestRequestId = 0;
 
-  async function load(organizationId: string | null): Promise<void> {
+  async function load(organizationId: string): Promise<void> {
     const requestId = ++latestRequestId;
 
     sites.value = [];
     errorMessage.value = null;
-
-    if (!organizationId) {
-      isLoading.value = false;
-      return;
-    }
 
     isLoading.value = true;
 

@@ -9,3 +9,7 @@ export type Site = {
   createdAt: string;
   updatedAt: string | null;
 };
+
+export type CreateSiteRequest = {
+  name: string;
+};

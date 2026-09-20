@@ -7,11 +7,13 @@ import Message from 'primevue/message';
 import ProgressSpinner from 'primevue/progressspinner';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 import { useOrganizationStore } from '../../organization/stores/organization.store';
 import SiteCard from '../components/SiteCard.vue';
 import { useSiteList } from '../composables/useSiteList';
 
 const { t } = useI18n();
+const router = useRouter();
 const organizationStore = useOrganizationStore();
 const { organizations, selectedOrganizationId } = storeToRefs(organizationStore);
 const { errorMessage, isLoading, load, sites } = useSiteList();
@@ -44,11 +46,17 @@ const filteredSites = computed(() => {
 watch(
   selectedOrganizationId,
   (organizationId) => {
-    searchQuery.value = '';
-    void load(organizationId);
+    if (organizationId) {
+      searchQuery.value = '';
+      void load(organizationId);
+    }
   },
   { immediate: true },
 );
+
+function openCreateSite(): void {
+  void router.push({ name: 'create-site' });
+}
 </script>
 
 <template>
@@ -63,6 +71,7 @@ watch(
       <Button
         v-if="selectedOrganization && hasSites && !isLoading && !errorMessage"
         type="button"
+        @click="openCreateSite"
       >
         <svg
           class="button-icon"
@@ -155,7 +164,10 @@ watch(
           <h2>{{ t('sites.empty.title') }}</h2>
           <p>{{ t('sites.empty.description', { organization: selectedOrganization.name }) }}</p>
         </div>
-        <Button type="button">
+        <Button
+          type="button"
+          @click="openCreateSite"
+        >
           <svg
             class="button-icon"
             viewBox="0 0 24 24"
