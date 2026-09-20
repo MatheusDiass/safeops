@@ -25,10 +25,6 @@ function getInitials(name: string): string {
     .join('');
 }
 
-function getStatusLabel(status: OrganizationStatus): string {
-  return t(`organizations.status.${status}`);
-}
-
 function getStatusSeverity(status: OrganizationStatus): 'success' | 'secondary' {
   return status === 'ACTIVE' ? 'success' : 'secondary';
 }
@@ -52,7 +48,7 @@ function getSiteCountLabel(siteCount: number): string {
         <h2>{{ organization.name }}</h2>
       </div>
       <Tag
-        :value="getStatusLabel(organization.status)"
+        :value="t(`organizations.status.${organization.status}`)"
         :severity="getStatusSeverity(organization.status)"
       />
     </div>

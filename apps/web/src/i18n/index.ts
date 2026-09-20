@@ -4,6 +4,8 @@ import authEnUS from '../modules/auth/i18n/en-US';
 import authPtBR from '../modules/auth/i18n/pt-BR';
 import organizationsEnUS from '../modules/organization/i18n/en-US';
 import organizationsPtBR from '../modules/organization/i18n/pt-BR';
+import sitesEnUS from '../modules/site/i18n/en-US';
+import sitesPtBR from '../modules/site/i18n/pt-BR';
 import sharedEnUS from './shared/en-US';
 import sharedPtBR from './shared/pt-BR';
 import {
@@ -49,11 +51,13 @@ export const i18n = createI18n({
       ...sharedPtBR,
       ...authPtBR,
       ...organizationsPtBR,
+      ...sitesPtBR,
     },
     'en-US': {
       ...sharedEnUS,
       ...authEnUS,
       ...organizationsEnUS,
+      ...sitesEnUS,
     },
   },
 });

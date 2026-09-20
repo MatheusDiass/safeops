@@ -5,6 +5,7 @@ import RegisterPage from '../../modules/auth/pages/RegisterPage.vue';
 import CreateOrganizationPage from '../../modules/organization/pages/CreateOrganizationPage.vue';
 import EditOrganizationPage from '../../modules/organization/pages/EditOrganizationPage.vue';
 import OrganizationsPage from '../../modules/organization/pages/OrganizationsPage.vue';
+import SitesPage from '../../modules/site/pages/SitesPage.vue';
 import WorkspacePage from '../../modules/workspace/pages/WorkspacePage.vue';
 
 export const router = createRouter({
@@ -55,7 +56,7 @@ export const router = createRouter({
         {
           path: 'sites',
           name: 'sites',
-          component: WorkspacePage,
+          component: SitesPage,
           meta: {
             title: 'Sites',
             description: 'View and manage the sites connected to this organization.',
