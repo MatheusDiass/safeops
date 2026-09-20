@@ -89,6 +89,7 @@ A feature may contain:
 ├── composables/
 ├── pages/
 ├── schemas/
+├── stores/
 └── types/
 ```
 
@@ -233,6 +234,8 @@ Pages
 
 Preferred behavior and data direction:
 
+For page-scoped data:
+
 ```text
 Page
     ↓
@@ -244,6 +247,24 @@ Shared HTTP Client
     ↓
 SafeOps Backend
 ```
+
+When state is shared across unrelated screens, the feature store owns that shared state and the actions that keep it synchronized:
+
+```text
+Page
+    ↓
+Composable, when it adds page behavior
+    ↓
+Feature Store
+    ↓
+Feature API
+    ↓
+Shared HTTP Client
+    ↓
+SafeOps Backend
+```
+
+A composable must not be added merely as a pass-through between a page and a store. It should add cohesive reactive behavior such as loading state, error presentation, filters, watchers, lifecycle coordination, or form submission state.
 
 Shared application components and utilities may be consumed where appropriate.
 
@@ -309,7 +330,19 @@ useIncidentList
 useIncidentDetails
 useIncidentForm
 useIncidentStatus
+useSiteList
+useSiteDetails
+useSiteCreateForm
+useSiteUpdateForm
 ```
+
+Use the naming convention:
+
+```text
+use{Feature}{Responsibility}
+```
+
+Prefer domain-specific return names such as `sites`, `site`, `isLoading`, `isSubmitting`, `errorMessage`, `load`, and `submit`. Avoid generic names such as `data` in feature composables.
 
 A composable is not a generic service container.
 
@@ -405,6 +438,38 @@ Create the `schemas/` directory only when the feature actually contains validati
 Schemas should reuse shared field rules when Create and Update forms validate the same fields.
 
 Schemas with user-facing validation messages must follow the translation dependency pattern documented in [Internationalization](#internationalization).
+
+For example, related schemas can reuse field rules while retaining translated messages:
+
+```ts
+type Translate = (key: string) => string;
+
+function organizationFieldsSchema(t: Translate) {
+  return z.object({
+    name: z
+      .string()
+      .trim()
+      .min(1, {
+        error: () => t('organizations.validation.nameRequired'),
+      })
+      .max(150, {
+        error: () => t('organizations.validation.nameMax'),
+      }),
+  });
+}
+
+export function createOrganizationSchema(t: Translate) {
+  return organizationFieldsSchema(t);
+}
+
+export function updateOrganizationSchema(t: Translate) {
+  return organizationFieldsSchema(t).extend({
+    status: z.enum(ORGANIZATION_STATUSES, {
+      error: () => t('organizations.validation.statusRequired'),
+    }),
+  });
+}
+```
 
 Avoid duplicating validation rules between related forms.
 
@@ -654,6 +719,27 @@ Poor candidates include:
 - temporary filters used only by one screen
 
 Prefer local state until a genuine cross-screen requirement exists.
+
+The Site module currently uses composables without a Pinia store because its site list, details, and form request state are page-scoped:
+
+```text
+Page → Site composable → siteApi
+```
+
+The Organization module is intentionally different because the available organizations and selected organization form an application-wide context used by initialization, onboarding, navigation, and unrelated screens:
+
+```text
+Page → Organization composable → Organization store → organizationApi
+```
+
+The Organization store owns shared organization data, selection, and actions that synchronize that state. Organization composables own page-specific loading, errors, filters, watchers, and submission state.
+
+Do not use a permanent `hasLoaded` guard for the organization list. Memberships may change outside the current browser session. Refresh operations must be able to consult the API again; deduplicating only concurrent in-flight requests is allowed and is not a persistent cache.
+
+Detailed conventions are documented separately:
+
+- `docs/composables.md` for composable naming, reactive state, async operations, and form integration;
+- `docs/stores.md` for Pinia boundaries, shared state, synchronization, and freshness.
 
 ---
 

@@ -54,6 +54,7 @@ Implementation conventions:
 - `docs/pages.md`
 - `docs/components.md`
 - `docs/composables.md`
+- `docs/stores.md`
 - `docs/api.md`
 - `docs/testing.md`
 - `docs/design-system.md`
@@ -175,6 +176,14 @@ Vue Single File Components should use this order:
 Component names use PascalCase.
 
 Composable names begin with `use`.
+
+Name feature composables using:
+
+```text
+use{Feature}{Responsibility}
+```
+
+Examples include `useSiteList`, `useSiteDetails`, `useSiteCreateForm`, and `useSiteUpdateForm`.
 
 Do not create a composable merely to reduce the number of lines in a Vue component.
 
@@ -407,6 +416,36 @@ Examples that normally remain local:
 - selected tab.
 
 Do not store PrimeVue Forms field state in Pinia.
+
+Follow these established feature boundaries:
+
+- Site data is page-scoped and currently uses feature composables that call `siteApi` directly. Do not create a Site store unless site state becomes shared across unrelated screens.
+- Organization data and `selectedOrganizationId` are application-wide context and remain in the Organization Pinia store.
+- Organization store actions may call `organizationApi` and synchronize shared state.
+- Organization composables must own page-specific loading, error messages, filters, watchers, and form submission state.
+- Do not create a composable that merely forwards arguments to a store action without adding cohesive reactive or orchestration behavior.
+- Do not create one composable mechanically for every API endpoint.
+- Do not add a permanent loaded-once cache for organizations. Organization refresh operations must be able to query the API again because memberships may change externally.
+- Concurrent request deduplication or stale-response protection is allowed; it must not prevent later refreshes.
+
+For feature composables:
+
+- use domain-specific data names such as `sites` and `site`, not generic `data`;
+- use `isLoading` for reads and `isSubmitting` for form mutations;
+- use `errorMessage` with `string | null` for a display-ready operation error;
+- use `load` for list/details loading and `submit` for form submission;
+- use a latest-request identifier when overlapping reads can occur and stale responses could overwrite current state;
+- use an `isSubmitting` guard for mutations that must not execute concurrently;
+- keep navigation and success notifications in the page unless a documented shared workflow requires otherwise;
+- use `handleSubmit` for the component event handler and alias a composable's `submit` when useful, for example `submit: createSite`;
+- render edit forms only after real API-backed initial values exist; do not mount them with placeholder values and expect `initialValues` to reinitialize later.
+
+Follow the detailed conventions in:
+
+```text
+docs/composables.md
+docs/stores.md
+```
 
 ---
 
