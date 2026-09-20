@@ -106,9 +106,7 @@ function openEditSite(siteId: string): void {
       severity="error"
       class="sites-page__error"
     >
-      <div class="sites-page__error-content">
-        <span>{{ errorMessage }}</span>
-      </div>
+      {{ errorMessage }}
     </Message>
 
     <template v-else-if="selectedOrganization">
@@ -246,11 +244,12 @@ function openEditSite(siteId: string): void {
 .sites-page__loading {
   display: flex;
   min-height: 14rem;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
   gap: 0.875rem;
   color: var(--p-text-muted-color);
+  text-align: center;
 }
 
 .sites-page__spinner {
@@ -260,13 +259,6 @@ function openEditSite(siteId: string): void {
 
 .sites-page__error {
   margin-top: 2rem;
-}
-
-.sites-page__error-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
 }
 
 .sites-search {
@@ -360,11 +352,6 @@ function openEditSite(siteId: string): void {
 
   .sites-page__header :deep(.p-button) {
     width: 100%;
-  }
-
-  .sites-page__error-content {
-    align-items: stretch;
-    flex-direction: column;
   }
 }
 </style>

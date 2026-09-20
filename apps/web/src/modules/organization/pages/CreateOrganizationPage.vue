@@ -4,44 +4,37 @@ import { zodResolver } from '@primevue/forms/resolvers/zod';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useOrganizationCreateForm } from '../composables/useOrganizationCreateForm';
 import {
   createOrganizationSchema,
   type CreateOrganizationFormValues,
 } from '../schemas/organization.schema';
-import { useOrganizationStore } from '../stores/organization.store';
 
 const router = useRouter();
 const { t } = useI18n();
-const organizationStore = useOrganizationStore();
+const { submit, isSubmitting, errorMessage } = useOrganizationCreateForm();
 const initialValues: CreateOrganizationFormValues = { name: '' };
 const resolver = computed(() => zodResolver(createOrganizationSchema(t)));
-const isSubmitting = ref(false);
-const errorMessage = ref<string>();
 
 function cancel(): void {
   void router.push({ name: 'organization' });
 }
 
-async function submit(event: FormSubmitEvent): Promise<void> {
-  errorMessage.value = undefined;
-
-  if (!event.valid || isSubmitting.value) {
+async function handleSubmit(event: FormSubmitEvent): Promise<void> {
+  if (!event.valid) {
     return;
   }
 
-  isSubmitting.value = true;
+  const wasCreated = await submit({ name: event.values.name });
 
-  try {
-    await organizationStore.createOrganization({ name: event.values.name });
-    await router.replace({ name: 'organization' });
-  } catch (error: unknown) {
-    errorMessage.value = error instanceof Error ? error.message : t('organizations.errors.create');
-  } finally {
-    isSubmitting.value = false;
+  if (!wasCreated) {
+    return;
   }
+
+  await router.replace({ name: 'organization' });
 }
 </script>
 
@@ -65,7 +58,7 @@ async function submit(event: FormSubmitEvent): Promise<void> {
       validate-on-blur
       validate-on-submit
       novalidate
-      @submit="submit"
+      @submit="handleSubmit"
     >
       <div class="field">
         <label for="organization-name">{{ t('organizations.fields.name.label') }}</label>

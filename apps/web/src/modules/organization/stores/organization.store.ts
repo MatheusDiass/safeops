@@ -10,20 +10,15 @@ import type {
 export const useOrganizationStore = defineStore('organization', () => {
   const organizations = ref<Organization[]>([]);
   const selectedOrganizationId = ref<string | null>(null);
-  let hasLoadedOrganizations = false;
   let organizationsRequest: Promise<Organization[]> | undefined;
 
   async function loadOrganizations(): Promise<Organization[]> {
-    if (hasLoadedOrganizations) {
-      return organizations.value;
-    }
-
     organizationsRequest ??= organizationApi.list();
+    const request = organizationsRequest;
 
     try {
-      const availableOrganizations = await organizationsRequest;
+      const availableOrganizations = await request;
       organizations.value = availableOrganizations;
-      hasLoadedOrganizations = true;
 
       const selectionIsAvailable = availableOrganizations.some(
         (organization) => organization.id === selectedOrganizationId.value,
@@ -34,7 +29,9 @@ export const useOrganizationStore = defineStore('organization', () => {
 
       return availableOrganizations;
     } finally {
-      organizationsRequest = undefined;
+      if (organizationsRequest === request) {
+        organizationsRequest = undefined;
+      }
     }
   }
 
@@ -72,9 +69,9 @@ export const useOrganizationStore = defineStore('organization', () => {
   }
 
   function clear(): void {
+    organizationsRequest = undefined;
     organizations.value = [];
     selectedOrganizationId.value = null;
-    hasLoadedOrganizations = false;
   }
 
   return {

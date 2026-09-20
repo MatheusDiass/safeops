@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { mdiMagnify, mdiOfficeBuildingPlusOutline, mdiPlus } from '@mdi/js';
-import { storeToRefs } from 'pinia';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
-import { computed, ref } from 'vue';
+import Message from 'primevue/message';
+import ProgressSpinner from 'primevue/progressspinner';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import OrganizationCard from '../components/OrganizationCard.vue';
-import { useOrganizationStore } from '../stores/organization.store';
+import { useOrganizationList } from '../composables/useOrganizationList';
 
-const organizationStore = useOrganizationStore();
 const router = useRouter();
 const { t } = useI18n();
-const { organizations } = storeToRefs(organizationStore);
+const { organizations, isLoading, errorMessage, load } = useOrganizationList();
 const searchQuery = ref('');
 
 const hasOrganizations = computed(() => organizations.value.length > 0);
@@ -40,6 +40,10 @@ function openCreateOrganization(): void {
 function openEditOrganization(organizationId: string): void {
   void router.push({ name: 'edit-organization', params: { organizationId } });
 }
+
+onMounted(() => {
+  void load();
+});
 </script>
 
 <template>
@@ -52,7 +56,7 @@ function openEditOrganization(organizationId: string): void {
       </div>
 
       <Button
-        v-if="hasOrganizations"
+        v-if="hasOrganizations && !isLoading && !errorMessage"
         type="button"
         @click="openCreateOrganization"
       >
@@ -68,76 +72,99 @@ function openEditOrganization(organizationId: string): void {
     </header>
 
     <div
-      v-if="hasOrganizations"
-      class="organizations-search"
+      v-if="isLoading"
+      class="organizations-page__loading"
+      role="status"
+      :aria-label="t('organizations.loadingLabel')"
     >
-      <svg
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <path :d="mdiMagnify" />
-      </svg>
-      <InputText
-        v-model="searchQuery"
-        type="search"
-        :placeholder="t('organizations.search.placeholder')"
-        :aria-label="t('organizations.search.label')"
-        fluid
+      <ProgressSpinner
+        class="organizations-page__spinner"
+        stroke-width="5"
       />
+      <span>{{ t('organizations.loading') }}</span>
     </div>
 
-    <section
-      v-if="hasOrganizations && filteredOrganizations.length > 0"
-      class="organizations-grid"
-      :aria-label="t('organizations.aria.list')"
+    <Message
+      v-else-if="errorMessage"
+      severity="error"
+      class="organizations-page__error"
     >
-      <OrganizationCard
-        v-for="organization in filteredOrganizations"
-        :key="organization.id"
-        :organization="organization"
-        @edit="openEditOrganization(organization.id)"
-      />
-    </section>
+      {{ errorMessage }}
+    </Message>
 
-    <section
-      v-else-if="hasOrganizations"
-      class="organizations-no-results"
-      aria-live="polite"
-    >
-      <h2>{{ t('organizations.search.noResultsTitle') }}</h2>
-      <p>{{ t('organizations.search.noResultsDescription') }}</p>
-    </section>
-
-    <section
-      v-else
-      class="organizations-empty-state"
-    >
-      <span
-        class="organizations-empty-state__icon"
-        aria-hidden="true"
-      >
-        <svg viewBox="0 0 24 24">
-          <path :d="mdiOfficeBuildingPlusOutline" />
-        </svg>
-      </span>
-      <div>
-        <h2>{{ t('organizations.empty.title') }}</h2>
-        <p>{{ t('organizations.empty.description') }}</p>
-      </div>
-      <Button
-        type="button"
-        @click="openCreateOrganization"
+    <template v-else>
+      <div
+        v-if="hasOrganizations"
+        class="organizations-search"
       >
         <svg
-          class="button-icon"
           viewBox="0 0 24 24"
           aria-hidden="true"
         >
-          <path :d="mdiPlus" />
+          <path :d="mdiMagnify" />
         </svg>
-        <span>{{ t('organizations.actions.create') }}</span>
-      </Button>
-    </section>
+        <InputText
+          v-model="searchQuery"
+          type="search"
+          :placeholder="t('organizations.search.placeholder')"
+          :aria-label="t('organizations.search.label')"
+          fluid
+        />
+      </div>
+
+      <section
+        v-if="hasOrganizations && filteredOrganizations.length > 0"
+        class="organizations-grid"
+        :aria-label="t('organizations.aria.list')"
+      >
+        <OrganizationCard
+          v-for="organization in filteredOrganizations"
+          :key="organization.id"
+          :organization="organization"
+          @edit="openEditOrganization(organization.id)"
+        />
+      </section>
+
+      <section
+        v-else-if="hasOrganizations"
+        class="organizations-no-results"
+        aria-live="polite"
+      >
+        <h2>{{ t('organizations.search.noResultsTitle') }}</h2>
+        <p>{{ t('organizations.search.noResultsDescription') }}</p>
+      </section>
+
+      <section
+        v-else
+        class="organizations-empty-state"
+      >
+        <span
+          class="organizations-empty-state__icon"
+          aria-hidden="true"
+        >
+          <svg viewBox="0 0 24 24">
+            <path :d="mdiOfficeBuildingPlusOutline" />
+          </svg>
+        </span>
+        <div>
+          <h2>{{ t('organizations.empty.title') }}</h2>
+          <p>{{ t('organizations.empty.description') }}</p>
+        </div>
+        <Button
+          type="button"
+          @click="openCreateOrganization"
+        >
+          <svg
+            class="button-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path :d="mdiPlus" />
+          </svg>
+          <span>{{ t('organizations.actions.create') }}</span>
+        </Button>
+      </section>
+    </template>
   </main>
 </template>
 
@@ -171,6 +198,26 @@ function openEditOrganization(organizationId: string): void {
   margin: 0.75rem 0 0;
   color: var(--p-text-muted-color);
   line-height: 1.6;
+}
+
+.organizations-page__loading {
+  display: flex;
+  min-height: 14rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.875rem;
+  color: var(--p-text-muted-color);
+  text-align: center;
+}
+
+.organizations-page__error {
+  margin-top: 2rem;
+}
+
+.organizations-page__spinner {
+  width: 2rem;
+  height: 2rem;
 }
 
 .button-icon {

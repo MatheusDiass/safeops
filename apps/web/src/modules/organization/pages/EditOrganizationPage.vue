@@ -6,14 +6,15 @@ import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
 import ProgressSpinner from 'primevue/progressspinner';
 import Select from 'primevue/select';
-import { computed, ref, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useOrganizationDetails } from '../composables/useOrganizationDetails';
+import { useOrganizationUpdateForm } from '../composables/useOrganizationUpdateForm';
 import {
   updateOrganizationSchema,
   type UpdateOrganizationFormValues,
 } from '../schemas/organization.schema';
-import { useOrganizationStore } from '../stores/organization.store';
 import type { OrganizationStatus } from '../types/organization.types';
 
 type StatusOption = {
@@ -24,17 +25,14 @@ type StatusOption = {
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
-const organizationStore = useOrganizationStore();
+const { organization, isLoading, errorMessage: loadErrorMessage, load } = useOrganizationDetails();
+const { isSubmitting, errorMessage: submitErrorMessage, submit } = useOrganizationUpdateForm();
 const statusOptions = computed<StatusOption[]>(() => [
   { label: t('organizations.status.ACTIVE'), value: 'ACTIVE' },
   { label: t('organizations.status.DISABLED'), value: 'DISABLED' },
 ]);
-const initialValues = ref<UpdateOrganizationFormValues>({ name: '', status: 'ACTIVE' });
+const initialValues = ref<UpdateOrganizationFormValues | null>(null);
 const resolver = computed(() => zodResolver(updateOrganizationSchema(t)));
-const isLoading = ref(true);
-const isSubmitting = ref(false);
-const loadErrorMessage = ref<string>();
-const submitErrorMessage = ref<string>();
 
 const organizationId = computed(() => {
   const routeId = route.params.organizationId;
@@ -42,57 +40,39 @@ const organizationId = computed(() => {
   return Array.isArray(routeId) ? routeId[0] : routeId;
 });
 
-function getErrorMessage(error: unknown, fallback: string): string {
-  return error instanceof Error ? error.message : fallback;
-}
-
 async function loadOrganization(): Promise<void> {
-  if (!organizationId.value) {
-    loadErrorMessage.value = t('organizations.errors.notFound');
-    isLoading.value = false;
+  initialValues.value = null;
+  await load(organizationId.value);
+
+  if (!organization.value) {
     return;
   }
 
-  isLoading.value = true;
-  loadErrorMessage.value = undefined;
-
-  try {
-    const organization = await organizationStore.loadOrganization(organizationId.value);
-    initialValues.value = {
-      name: organization.name,
-      status: organization.status,
-    };
-  } catch (error: unknown) {
-    loadErrorMessage.value = getErrorMessage(error, t('organizations.errors.load'));
-  } finally {
-    isLoading.value = false;
-  }
+  initialValues.value = {
+    name: organization.value.name,
+    status: organization.value.status,
+  };
 }
 
 function cancel(): void {
   void router.push({ name: 'organization' });
 }
 
-async function submit(event: FormSubmitEvent): Promise<void> {
-  submitErrorMessage.value = undefined;
-
-  if (!event.valid || !organizationId.value || isSubmitting.value) {
+async function handleSubmit(event: FormSubmitEvent): Promise<void> {
+  if (!event.valid || !organizationId.value) {
     return;
   }
 
-  isSubmitting.value = true;
+  const wasUpdated = await submit(organizationId.value, {
+    name: event.values.name,
+    status: event.values.status,
+  });
 
-  try {
-    await organizationStore.updateOrganization(organizationId.value, {
-      name: event.values.name,
-      status: event.values.status,
-    });
-    await router.replace({ name: 'organization' });
-  } catch (error: unknown) {
-    submitErrorMessage.value = getErrorMessage(error, t('organizations.errors.update'));
-  } finally {
-    isSubmitting.value = false;
+  if (!wasUpdated) {
+    return;
   }
+
+  await router.replace({ name: 'organization' });
 }
 
 onMounted(() => {
@@ -140,9 +120,10 @@ onMounted(() => {
       </div>
     </Message>
 
-    <template v-else>
+    <template v-else-if="initialValues">
       <Form
         id="edit-organization-form"
+        :key="organizationId"
         v-slot="$form"
         class="organization-details-card"
         :initial-values="initialValues"
@@ -151,7 +132,7 @@ onMounted(() => {
         validate-on-blur
         validate-on-submit
         novalidate
-        @submit="submit"
+        @submit="handleSubmit"
       >
         <div class="organization-details-card__header">
           <h2>{{ t('organizations.edit.detailsTitle') }}</h2>

@@ -1,0 +1,42 @@
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useOrganizationStore } from '../stores/organization.store';
+import type { UpdateOrganizationRequest } from '../types/organization.types';
+
+export function useOrganizationUpdateForm() {
+  const { t } = useI18n();
+  const organizationStore = useOrganizationStore();
+
+  const isSubmitting = ref(false);
+  const errorMessage = ref<string | null>(null);
+
+  async function submit(
+    organizationId: string,
+    request: UpdateOrganizationRequest,
+  ): Promise<boolean> {
+    errorMessage.value = null;
+
+    if (isSubmitting.value) {
+      return false;
+    }
+
+    isSubmitting.value = true;
+
+    try {
+      await organizationStore.updateOrganization(organizationId, request);
+      return true;
+    } catch (error: unknown) {
+      errorMessage.value =
+        error instanceof Error ? error.message : t('organizations.errors.update');
+      return false;
+    } finally {
+      isSubmitting.value = false;
+    }
+  }
+
+  return {
+    isSubmitting,
+    errorMessage,
+    submit,
+  };
+}
