@@ -2,7 +2,9 @@ package com.bytepowerlabs.safeops_api.modules.incident.service
 
 import com.bytepowerlabs.safeops_api.modules.incident.exception.IncidentOccurrenceDateInFutureException
 import com.bytepowerlabs.safeops_api.modules.incident.dto.CreateIncidentRequest
+import com.bytepowerlabs.safeops_api.modules.incident.dto.IncidentResponse
 import com.bytepowerlabs.safeops_api.modules.incident.entity.IncidentEntity
+import com.bytepowerlabs.safeops_api.modules.incident.event.IncidentCreatedApplicationEvent
 import com.bytepowerlabs.safeops_api.modules.incident.repository.IncidentRepository
 import com.bytepowerlabs.safeops_api.modules.organization.entity.OrganizationMembershipStatus
 import com.bytepowerlabs.safeops_api.modules.organization.entity.OrganizationStatus
@@ -14,6 +16,7 @@ import com.bytepowerlabs.safeops_api.modules.site.entity.SiteStatus
 import com.bytepowerlabs.safeops_api.modules.site.exception.SiteDisabledException
 import com.bytepowerlabs.safeops_api.modules.site.exception.SiteNotFoundException
 import com.bytepowerlabs.safeops_api.modules.site.repository.SiteRepository
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -23,7 +26,8 @@ import java.util.UUID
 class CreateIncidentService(
     private val membershipRepository: OrganizationMembershipRepository,
     private val siteRepository: SiteRepository,
-    private val incidentRepository: IncidentRepository
+    private val incidentRepository: IncidentRepository,
+    private val applicationEventPublisher: ApplicationEventPublisher,
 ) {
     @Transactional
     fun execute(organizationId: UUID, siteId: UUID, userAccountId: UUID, request: CreateIncidentRequest) {
@@ -66,6 +70,12 @@ class CreateIncidentService(
             immediateActions = request.immediateActions?.trim()?.takeIf { it.isNotEmpty() },
         )
 
-        incidentRepository.save(incident)
+        val incidentCreated = incidentRepository.save(incident)
+
+        applicationEventPublisher.publishEvent(IncidentCreatedApplicationEvent(
+            organizationId = organizationId,
+            siteId = siteId,
+            incidentId = incidentCreated.id,
+        ))
     }
 }

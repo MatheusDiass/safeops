@@ -1,5 +1,6 @@
 package com.bytepowerlabs.safeops_api.modules.incident.dto
 
+import com.bytepowerlabs.safeops_api.modules.incident.entity.IncidentEntity
 import com.bytepowerlabs.safeops_api.modules.incident.entity.IncidentSeverity
 import com.bytepowerlabs.safeops_api.modules.incident.entity.IncidentStatus
 import com.bytepowerlabs.safeops_api.modules.incident.entity.IncidentType
