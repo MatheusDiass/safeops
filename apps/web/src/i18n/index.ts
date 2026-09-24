@@ -2,6 +2,8 @@ import { watch } from 'vue';
 import { createI18n } from 'vue-i18n';
 import authEnUS from '../modules/auth/i18n/en-US';
 import authPtBR from '../modules/auth/i18n/pt-BR';
+import incidentsEnUS from '../modules/incident/i18n/en-US';
+import incidentsPtBR from '../modules/incident/i18n/pt-BR';
 import organizationsEnUS from '../modules/organization/i18n/en-US';
 import organizationsPtBR from '../modules/organization/i18n/pt-BR';
 import sitesEnUS from '../modules/site/i18n/en-US';
@@ -50,12 +52,14 @@ export const i18n = createI18n({
     'pt-BR': {
       ...sharedPtBR,
       ...authPtBR,
+      ...incidentsPtBR,
       ...organizationsPtBR,
       ...sitesPtBR,
     },
     'en-US': {
       ...sharedEnUS,
       ...authEnUS,
+      ...incidentsEnUS,
       ...organizationsEnUS,
       ...sitesEnUS,
     },
