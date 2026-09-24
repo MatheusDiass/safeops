@@ -2,6 +2,7 @@ package com.bytepowerlabs.safeops_api.modules.incident.service
 
 import com.bytepowerlabs.safeops_api.modules.incident.dto.IncidentReporterResponse
 import com.bytepowerlabs.safeops_api.modules.incident.dto.IncidentResponse
+import com.bytepowerlabs.safeops_api.modules.incident.dto.IncidentSiteResponse
 import com.bytepowerlabs.safeops_api.modules.incident.exception.IncidentNotFoundException
 import com.bytepowerlabs.safeops_api.modules.incident.repository.IncidentRepository
 import com.bytepowerlabs.safeops_api.modules.organization.entity.OrganizationMembershipStatus
@@ -18,7 +19,7 @@ class GetIncidentService(
     private val incidentRepository: IncidentRepository
 ) {
     @Transactional(readOnly = true)
-    fun execute(organizationId: UUID, siteId: UUID, incidentId: UUID, userAccountId: UUID): IncidentResponse {
+    fun execute(organizationId: UUID, incidentId: UUID, userAccountId: UUID): IncidentResponse {
         val membership = membershipRepository.findByOrganizationIdAndUserAccountId(
             organizationId = organizationId,
             userAccountId = userAccountId
@@ -28,10 +29,9 @@ class GetIncidentService(
             throw OrganizationAccessDeniedException()
         }
 
-        val incident = incidentRepository.findByIdAndOrganizationIdAndSiteId(
+        val incident = incidentRepository.findByIdAndOrganizationId(
             id = incidentId,
             organizationId = organizationId,
-            siteId = siteId
         ) ?: throw IncidentNotFoundException()
 
         return IncidentResponse(
@@ -47,6 +47,10 @@ class GetIncidentService(
             reportedBy = IncidentReporterResponse(
                 id = incident.reportedBy.id,
                 name = incident.reportedBy.name,
+            ),
+            site = IncidentSiteResponse(
+                id = incident.site.id,
+                name = incident.site.name,
             ),
             closedAt = incident.closedAt,
             createdAt = incident.createdAt,

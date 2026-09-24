@@ -20,7 +20,6 @@ class UpdateIncidentService(
     @Transactional
     fun execute(
         organizationId: UUID,
-        siteId: UUID,
         incidentId: UUID,
         userAccountId: UUID,
         request: UpdateIncidentRequest
@@ -35,10 +34,9 @@ class UpdateIncidentService(
             throw OrganizationAccessDeniedException()
         }
 
-        val incident = incidentRepository.findByIdAndOrganizationIdAndSiteId(
+        val incident = incidentRepository.findByIdAndOrganizationId(
             id = incidentId,
             organizationId = organizationId,
-            siteId = siteId
         ) ?: throw IncidentNotFoundException()
 
         val isOwner = membership.role == OrganizationRole.OWNER

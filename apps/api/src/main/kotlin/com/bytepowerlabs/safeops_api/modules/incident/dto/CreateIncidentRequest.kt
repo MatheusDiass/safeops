@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.PastOrPresent
 import jakarta.validation.constraints.Size
 import java.time.Instant
+import java.util.UUID
 
 data class CreateIncidentRequest(
     @NotBlank(message = "Title cannot be blank")
@@ -28,4 +29,6 @@ data class CreateIncidentRequest(
 
     @Size(max = 5000, message = "Immediate actions must be at most 5000 characters")
     val immediateActions: String? = null,
+
+    val siteId: UUID
 )

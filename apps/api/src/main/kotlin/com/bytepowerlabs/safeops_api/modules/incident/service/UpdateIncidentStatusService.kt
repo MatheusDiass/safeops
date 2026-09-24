@@ -20,7 +20,6 @@ class UpdateIncidentStatusService(
     @Transactional
     fun execute(
         organizationId: UUID,
-        siteId: UUID,
         incidentId: UUID,
         userAccountId: UUID,
         request: UpdateIncidentStatusRequest
@@ -34,10 +33,9 @@ class UpdateIncidentStatusService(
             throw OrganizationAccessDeniedException()
         }
 
-        val incident = incidentRepository.findByIdAndOrganizationIdAndSiteId(
+        val incident = incidentRepository.findByIdAndOrganizationId(
             id = incidentId,
             organizationId = organizationId,
-            siteId = siteId
         ) ?: throw IncidentNotFoundException()
 
         incident.updateStatus(request.status)

@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 @RestController
-@RequestMapping("/organizations/{organizationId}/sites/{siteId}/incidents")
+@RequestMapping("/organizations/{organizationId}/incidents")
 class IncidentController(
     private val createIncidentService: CreateIncidentService,
     private val getIncidentService: GetIncidentService,
@@ -36,13 +36,11 @@ class IncidentController(
     @ResponseStatus(HttpStatus.CREATED)
     fun createIncident(
         @PathVariable organizationId: UUID,
-        @PathVariable siteId: UUID,
         @Valid @RequestBody request: CreateIncidentRequest,
         @AuthenticationPrincipal jwt: Jwt
     ) {
         createIncidentService.execute(
             organizationId = organizationId,
-            siteId = siteId,
             request = request,
             userAccountId = UUID.fromString(jwt.subject)
         )
@@ -51,13 +49,11 @@ class IncidentController(
     @GetMapping("/{incidentId}")
     fun getIncident(
         @PathVariable organizationId: UUID,
-        @PathVariable siteId: UUID,
         @PathVariable incidentId: UUID,
         @AuthenticationPrincipal jwt: Jwt
     ): IncidentResponse {
         return getIncidentService.execute(
             organizationId = organizationId,
-            siteId = siteId,
             incidentId = incidentId,
             userAccountId = UUID.fromString(jwt.subject)
         )
@@ -66,12 +62,10 @@ class IncidentController(
     @GetMapping
     fun listIncidents(
         @PathVariable organizationId: UUID,
-        @PathVariable siteId: UUID,
         @AuthenticationPrincipal jwt: Jwt
     ): List<IncidentResponse> {
         return listIncidentsService.execute(
             organizationId = organizationId,
-            siteId = siteId,
             userAccountId = UUID.fromString(jwt.subject)
         )
     }
@@ -80,14 +74,12 @@ class IncidentController(
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun updateIncident(
         @PathVariable organizationId: UUID,
-        @PathVariable siteId: UUID,
         @PathVariable incidentId: UUID,
         @Valid @RequestBody request: UpdateIncidentRequest,
         @AuthenticationPrincipal jwt: Jwt
     ) {
         updateIncidentService.execute(
             organizationId = organizationId,
-            siteId = siteId,
             incidentId = incidentId,
             userAccountId = UUID.fromString(jwt.subject),
             request = request,
@@ -98,14 +90,12 @@ class IncidentController(
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun updateIncidentStatus(
         @PathVariable organizationId: UUID,
-        @PathVariable siteId: UUID,
         @PathVariable incidentId: UUID,
         @Valid @RequestBody request: UpdateIncidentStatusRequest,
         @AuthenticationPrincipal jwt: Jwt
     ) {
         updateIncidentStatusService.execute(
             organizationId = organizationId,
-            siteId = siteId,
             incidentId = incidentId,
             userAccountId = UUID.fromString(jwt.subject),
             request = request

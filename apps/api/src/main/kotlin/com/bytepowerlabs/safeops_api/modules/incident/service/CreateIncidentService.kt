@@ -30,7 +30,7 @@ class CreateIncidentService(
     private val applicationEventPublisher: ApplicationEventPublisher,
 ) {
     @Transactional
-    fun execute(organizationId: UUID, siteId: UUID, userAccountId: UUID, request: CreateIncidentRequest) {
+    fun execute(organizationId: UUID, userAccountId: UUID, request: CreateIncidentRequest) {
         val membership = membershipRepository.findByOrganizationIdAndUserAccountId(
             organizationId = organizationId,
             userAccountId = userAccountId
@@ -46,7 +46,7 @@ class CreateIncidentService(
             throw OrganizationDisabledException()
         }
 
-        val site = siteRepository.findByIdAndOrganizationId(id = siteId, organizationId = organizationId)
+        val site = siteRepository.findByIdAndOrganizationId(id = request.siteId, organizationId = organizationId)
             ?: throw SiteNotFoundException()
 
         if (site.status != SiteStatus.ACTIVE) {
@@ -74,7 +74,7 @@ class CreateIncidentService(
 
         applicationEventPublisher.publishEvent(IncidentCreatedApplicationEvent(
             organizationId = organizationId,
-            siteId = siteId,
+            siteId = request.siteId,
             incidentId = incidentCreated.id,
         ))
     }

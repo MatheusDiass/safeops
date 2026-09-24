@@ -2,6 +2,7 @@ package com.bytepowerlabs.safeops_api.modules.incident.service
 
 import com.bytepowerlabs.safeops_api.modules.incident.dto.IncidentReporterResponse
 import com.bytepowerlabs.safeops_api.modules.incident.dto.IncidentResponse
+import com.bytepowerlabs.safeops_api.modules.incident.dto.IncidentSiteResponse
 import com.bytepowerlabs.safeops_api.modules.incident.repository.IncidentRepository
 import com.bytepowerlabs.safeops_api.modules.organization.entity.OrganizationMembershipStatus
 import com.bytepowerlabs.safeops_api.modules.organization.exception.OrganizationAccessDeniedException
@@ -16,11 +17,10 @@ import java.util.UUID
 @Service
 class ListIncidentsService(
     private val membershipRepository: OrganizationMembershipRepository,
-    private val siteRepository: SiteRepository,
     private val incidentRepository: IncidentRepository
 ) {
     @Transactional(readOnly = true)
-    fun execute(organizationId: UUID, siteId: UUID, userAccountId: UUID): List<IncidentResponse> {
+    fun execute(organizationId: UUID, userAccountId: UUID): List<IncidentResponse> {
         val membership = membershipRepository.findByOrganizationIdAndUserAccountId(
             organizationId = organizationId,
             userAccountId = userAccountId
@@ -30,11 +30,8 @@ class ListIncidentsService(
             throw OrganizationAccessDeniedException()
         }
 
-        siteRepository.findByIdAndOrganizationId(id = siteId, organizationId = organizationId)
-            ?: throw SiteNotFoundException()
-
         val incidents =
-            incidentRepository.findAllByOrganizationIdAndSiteId(organizationId = organizationId, siteId = siteId)
+            incidentRepository.findAllByOrganizationIdOrderById(organizationId = organizationId)
 
         return incidents.map { incident ->
             IncidentResponse(
@@ -50,6 +47,10 @@ class ListIncidentsService(
                 reportedBy = IncidentReporterResponse(
                     id = incident.reportedBy.id,
                     name = incident.reportedBy.name,
+                ),
+                site = IncidentSiteResponse(
+                    id = incident.site.id,
+                    name = incident.site.name,
                 ),
                 closedAt = incident.closedAt,
                 createdAt = incident.createdAt,

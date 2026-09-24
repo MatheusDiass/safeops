@@ -18,12 +18,18 @@ data class IncidentResponse(
     val location: String?,
     val immediateActions: String?,
     val reportedBy: IncidentReporterResponse,
+    val site: IncidentSiteResponse,
     val closedAt: Instant?,
     val createdAt: Instant,
     val updatedAt: Instant,
 )
 
 data class IncidentReporterResponse(
+    val id: UUID,
+    val name: String,
+)
+
+data class IncidentSiteResponse(
     val id: UUID,
     val name: String,
 )

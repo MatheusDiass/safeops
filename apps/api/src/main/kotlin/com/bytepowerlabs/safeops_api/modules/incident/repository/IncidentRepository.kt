@@ -6,8 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository
 import java.util.UUID
 
 interface IncidentRepository : JpaRepository<IncidentEntity, UUID> {
-    fun findByIdAndOrganizationIdAndSiteId(id: UUID, organizationId: UUID, siteId: UUID): IncidentEntity?
+    @EntityGraph(attributePaths = ["reportedBy", "site"])
+    fun findByIdAndOrganizationId(id: UUID, organizationId: UUID): IncidentEntity?
 
-    @EntityGraph(attributePaths = ["reportedBy"])
-    fun findAllByOrganizationIdAndSiteId(organizationId: UUID, siteId: UUID): List<IncidentEntity>
+    @EntityGraph(attributePaths = ["reportedBy", "site"])
+    fun findAllByOrganizationIdOrderById(organizationId: UUID): List<IncidentEntity>
 }
