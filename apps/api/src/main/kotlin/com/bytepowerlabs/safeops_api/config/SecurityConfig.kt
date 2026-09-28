@@ -44,7 +44,7 @@ class SecurityConfig(private val corsProperties: CorsProperties) {
         val configuration = CorsConfiguration().apply {
             allowedOrigins = corsProperties.allowedOrigins
             allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-            allowedHeaders = listOf("Authorization", "Content-Type")
+            allowedHeaders = listOf("Authorization", "Content-Type", "Last-Event-ID")
             allowCredentials = true
         }
 
