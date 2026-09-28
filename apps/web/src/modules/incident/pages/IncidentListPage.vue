@@ -17,10 +17,12 @@ import Select from 'primevue/select';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '../../auth/stores/auth.store';
 import { useOrganizationStore } from '../../organization/stores/organization.store';
 import IncidentCard from '../components/IncidentCard.vue';
 import IncidentTable from '../components/IncidentTable.vue';
 import { useIncidentList } from '../composables/useIncidentList';
+import { useIncidentRealtime } from '../composables/useIncidentRealtime';
 import {
   INCIDENT_SEVERITIES,
   INCIDENT_STATUSES,
@@ -67,9 +69,17 @@ const MOCK_SUMMARY_CARDS: SummaryCard[] = [
 
 const { locale, t } = useI18n();
 const router = useRouter();
+const authStore = useAuthStore();
 const organizationStore = useOrganizationStore();
+const { accessToken } = storeToRefs(authStore);
 const { organizations, selectedOrganizationId } = storeToRefs(organizationStore);
-const { errorMessage, incidents, isLoading, load } = useIncidentList();
+const { errorMessage, incidents, isLoading, load, refresh } = useIncidentList();
+
+useIncidentRealtime({
+  organizationId: selectedOrganizationId,
+  accessToken,
+  refresh,
+});
 
 const searchQuery = ref('');
 const selectedSeverity = ref<IncidentSeverity | null>(null);

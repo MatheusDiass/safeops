@@ -5,7 +5,7 @@ type ApiErrorBody = {
   message?: string;
 };
 
-const apiUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+export const apiBaseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 const unauthenticatedEndpoints = new Set([
   '/identity/auth/web/login',
   '/identity/auth/web/logout',
@@ -19,7 +19,7 @@ export function configureAccessTokenProvider(provider: () => string | undefined)
 }
 
 export const http = axios.create({
-  baseURL: apiUrl,
+  baseURL: apiBaseUrl,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

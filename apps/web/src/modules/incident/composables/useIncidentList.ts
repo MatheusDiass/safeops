@@ -11,13 +11,19 @@ export function useIncidentList() {
   const errorMessage = ref<string | null>(null);
 
   let latestRequestId = 0;
+  let latestLoadRequestId = 0;
+  let backgroundRefresh: Promise<void> | null = null;
+  let queuedRefreshOrganizationId: string | null = null;
 
-  async function load(organizationId: string): Promise<void> {
+  async function requestIncidents(organizationId: string, background: boolean): Promise<void> {
     const requestId = ++latestRequestId;
 
-    incidents.value = [];
-    errorMessage.value = null;
-    isLoading.value = true;
+    if (!background) {
+      latestLoadRequestId = requestId;
+      incidents.value = [];
+      errorMessage.value = null;
+      isLoading.value = true;
+    }
 
     try {
       const availableIncidents = await incidentApi.list(organizationId);
@@ -26,13 +32,40 @@ export function useIncidentList() {
         incidents.value = availableIncidents;
       }
     } catch (error: unknown) {
-      if (requestId === latestRequestId) {
+      if (background) {
+        console.warn('Could not refresh incidents.', error);
+        return;
+      }
+
+      if (!background && requestId === latestRequestId) {
         errorMessage.value = error instanceof Error ? error.message : t('incidents.errors.load');
       }
     } finally {
-      if (requestId === latestRequestId) {
+      if (!background && requestId === latestLoadRequestId) {
         isLoading.value = false;
       }
+    }
+  }
+
+  async function load(organizationId: string): Promise<void> {
+    await requestIncidents(organizationId, false);
+  }
+
+  function refresh(organizationId: string): Promise<void> {
+    queuedRefreshOrganizationId = organizationId;
+    backgroundRefresh ??= runQueuedRefreshes();
+    return backgroundRefresh;
+  }
+
+  async function runQueuedRefreshes(): Promise<void> {
+    try {
+      while (queuedRefreshOrganizationId !== null) {
+        const organizationId = queuedRefreshOrganizationId;
+        queuedRefreshOrganizationId = null;
+        await requestIncidents(organizationId, true);
+      }
+    } finally {
+      backgroundRefresh = null;
     }
   }
 
@@ -41,5 +74,6 @@ export function useIncidentList() {
     isLoading,
     errorMessage,
     load,
+    refresh,
   };
 }
