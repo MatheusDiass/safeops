@@ -6,6 +6,57 @@ export default {
       report: 'Reportar incidente',
       resetFilters: 'Limpar filtros',
     },
+    create: {
+      title: 'Reportar um incidente',
+      description:
+        'Registre o que aconteceu enquanto os detalhes estão recentes. Você poderá atualizar o registro depois.',
+      sections: {
+        location: 'Onde aconteceu',
+        details: 'O que aconteceu',
+        reporter: 'Relator',
+      },
+      fields: {
+        site: {
+          label: 'Local',
+          placeholder: 'Selecione um local',
+        },
+        location: {
+          label: 'Local exato · Opcional',
+          hint: 'Prédio, linha, sala ou identificação do equipamento.',
+        },
+        title: {
+          label: 'Título',
+          placeholder: 'Resumo breve do evento',
+        },
+        type: {
+          label: 'Tipo de incidente',
+          placeholder: 'Selecione um tipo de incidente',
+        },
+        occurredAt: {
+          label: 'Data e hora da ocorrência',
+        },
+        severity: {
+          label: 'Severidade · Opcional',
+          hint: 'A severidade ajuda a priorizar a análise e a resposta.',
+        },
+        description: {
+          label: 'Descrição',
+          placeholder: 'Descreva o evento de forma objetiva...',
+          hint: 'O que aconteceu, quem estava envolvido e a sequência dos acontecimentos.',
+        },
+        immediateActions: {
+          label: 'Ações imediatas tomadas · Opcional',
+          placeholder: 'Contenção, primeiros socorros, bloqueio, isolamento da área...',
+        },
+      },
+      reporter: {
+        label: 'Reportado por',
+      },
+      sites: {
+        loading: 'Carregando locais...',
+        empty: 'Esta organização não possui locais ativos disponíveis para reportar incidentes.',
+      },
+    },
     summary: {
       label: 'Resumo de incidentes',
       reported: 'Reportados',
@@ -73,6 +124,19 @@ export default {
     loadingLabel: 'Carregando incidentes',
     errors: {
       load: 'Não foi possível carregar os incidentes. Tente novamente.',
+      create: 'Não foi possível reportar o incidente. Tente novamente.',
+    },
+    validation: {
+      siteRequired: 'Selecione um local.',
+      locationMax: 'O local exato deve ter no máximo 150 caracteres.',
+      titleRequired: 'Informe um título.',
+      titleMax: 'O título deve ter no máximo 150 caracteres.',
+      typeRequired: 'Selecione um tipo de incidente.',
+      occurredAtRequired: 'Selecione quando o incidente aconteceu.',
+      occurredAtFuture: 'A data da ocorrência não pode estar no futuro.',
+      descriptionRequired: 'Informe uma descrição.',
+      descriptionMax: 'A descrição deve ter no máximo 3.000 caracteres.',
+      immediateActionsMax: 'As ações imediatas devem ter no máximo 5.000 caracteres.',
     },
     aria: {
       list: 'Incidentes',

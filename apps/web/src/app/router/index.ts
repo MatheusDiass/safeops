@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import AppLayout from '../../layouts/AppLayout.vue';
 import LoginPage from '../../modules/auth/pages/LoginPage.vue';
 import RegisterPage from '../../modules/auth/pages/RegisterPage.vue';
+import CreateIncidentPage from '../../modules/incident/pages/CreateIncidentPage.vue';
 import IncidentListPage from '../../modules/incident/pages/IncidentListPage.vue';
 import CreateOrganizationPage from '../../modules/organization/pages/CreateOrganizationPage.vue';
 import EditOrganizationPage from '../../modules/organization/pages/EditOrganizationPage.vue';
@@ -95,7 +96,7 @@ export const router = createRouter({
         {
           path: 'incidents/new',
           name: 'report-incident',
-          component: WorkspacePage,
+          component: CreateIncidentPage,
           meta: {
             title: 'Report incident',
             description: 'Report a safety incident for the selected organization.',

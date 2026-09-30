@@ -39,3 +39,14 @@ export type Incident = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type CreateIncidentRequest = {
+  title: string;
+  description: string;
+  type: IncidentType;
+  severity: IncidentSeverity | null;
+  occurredAt: string;
+  location: string | null;
+  immediateActions: string | null;
+  siteId: string;
+};
